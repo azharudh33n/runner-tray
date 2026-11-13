@@ -46,7 +46,7 @@ internal sealed class RowControl : Control
         TabStop = Url is not null;
         Cursor = Url is null ? Cursors.Default : Cursors.Hand;
         AccessibleName = SpokenText;
-        AccessibleRole = Url is null ? AccessibleRole.ListItem : AccessibleRole.Link;
+        AccessibleRole = Url is null ? AccessibleRole.StaticText : AccessibleRole.Link;
         AccessibleDefaultActionDescription = Url is null ? null : "Open on GitHub";
     }
 
@@ -162,7 +162,7 @@ internal sealed class RowControl : Control
         public RowAccessible(RowControl row) : base(row) => _row = row;
 
         public override string? Name => _row.SpokenText;
-        public override AccessibleRole Role => _row.Url is null ? AccessibleRole.ListItem : AccessibleRole.Link;
+        public override AccessibleRole Role => _row.Url is null ? AccessibleRole.StaticText : AccessibleRole.Link;
         public override string? DefaultAction => _row.Url is null ? null : "Open on GitHub";
         public override void DoDefaultAction() => _row.Activate();
     }

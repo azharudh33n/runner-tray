@@ -13,7 +13,8 @@ internal static class Screenshots
     public static void RenderAll(string folder, bool live = false)
     {
         Directory.CreateDirectory(folder);
-        IDataSource source = live ? new GitHubSource(AppConfig.Load()) : new DemoSource();
+        using var services = live ? Services.Create(AppConfig.Load()) : null;
+        IDataSource source = services is not null ? services.Source : new DemoSource();
         var snapshot = Task.Run(() => source.FetchAsync(CancellationToken.None)).GetAwaiter().GetResult();
         var local = Task.Run(() => source.FetchLocalAsync(CancellationToken.None)).GetAwaiter().GetResult();
 
@@ -42,6 +43,18 @@ internal static class Screenshots
 
         using var toast = Toast();
         toast.Save(Path.Combine(folder, "notification.png"), ImageFormat.Png);
+
+        using (var signIn = new SignInForm(
+            _ => Task.FromResult(new DeviceCode("demo", "WDJB-MJHT", "https://github.com/login/device", TimeSpan.FromMinutes(15), TimeSpan.FromSeconds(5))),
+            (_, ct) => Task.Delay(Timeout.Infinite, ct).ContinueWith<TokenSet>(_ => throw new OperationCanceledException(), TaskScheduler.Default)))
+        {
+            SaveWindow(signIn, Path.Combine(folder, "sign-in.png"));
+        }
+
+        using (var settings = new SettingsForm(new AppConfig { Owner = "northwind-labs" }, "Signed in with GitHub, watching northwind-labs.", true, true))
+        {
+            SaveWindow(settings, Path.Combine(folder, "settings.png"));
+        }
     }
 
     /// <summary>The popup above a mock Windows desktop and taskbar, with a notification.</summary>
@@ -191,5 +204,23 @@ internal static class Screenshots
             using var path = Theme.Rounded(new RectangleF(r.X - i, r.Y - i + 8, r.Width + 2 * i, r.Height + 2 * i), radius + i);
             g.FillPath(shadow, path);
         }
+    }
+
+    /// <summary>Shows a window off screen, lets it finish loading, and saves an image of it.</summary>
+    private static void SaveWindow(Form form, string path)
+    {
+        form.StartPosition = FormStartPosition.Manual;
+        form.Location = new Point(-4000, -4000);
+        form.Show();
+        for (var i = 0; i < 20; i++)
+        {
+            Application.DoEvents();
+            Thread.Sleep(25);
+        }
+
+        using var bmp = new Bitmap(form.Width, form.Height);
+        form.DrawToBitmap(bmp, new Rectangle(Point.Empty, form.Size));
+        bmp.Save(path, ImageFormat.Png);
+        form.Close();
     }
 }

@@ -1,9 +1,16 @@
-# Push a tag like v0.1.0 to build both zips and publish a GitHub release.
+# Push a tag like v1.0.0. This workflow tests, builds the installer (Velopack) and the portable zip,
+# and publishes them as a GitHub release. Installed copies update themselves from these releases.
 name: Release
 
 on:
   push:
     tags: ["v*"]
+  # Dry run from the Actions tab: builds everything and uploads it as an artifact, publishes nothing.
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to build, for example 1.0.0
+        required: true
 
 permissions:
   contents: write
@@ -13,23 +20,76 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: |
+            8.0.x
+            9.0.x
 
-      - name: Publish (self-contained, one exe)
-        run: dotnet publish src/RunnerTray -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o out/full
-
-      - name: Publish (needs .NET 8 Desktop Runtime)
-        run: dotnet publish src/RunnerTray -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o out/small
-
-      - name: Zip
+      - name: Version from tag
         shell: pwsh
         run: |
-          Compress-Archive out/full/RunnerTray.exe, README.md, LICENSE RunnerTray-win-x64.zip
-          Compress-Archive out/small/RunnerTray.exe, README.md, LICENSE RunnerTray-win-x64-small.zip
+          $v = '${{ inputs.version || github.ref_name }}'.TrimStart('v')
+          if ($v -notmatch '^\d+\.\d+\.\d+$') { throw "Tag must look like v1.2.3" }
+          "VERSION=$v" >> $env:GITHUB_ENV
 
-      - name: Create release
+      - name: Build and test
+        shell: pwsh
+        run: |
+          dotnet build RunnerTray.sln -c Release -p:Version=$env:VERSION
+          dotnet test tests/RunnerTray.Tests -c Release --no-build
+          dotnet test tests/RunnerTray.UiTests -c Release --no-build
+
+      - name: Publish app for the installer
+        run: dotnet publish src/RunnerTray -c Release -r win-x64 --self-contained true -p:Version=${{ env.VERSION }} -o out/app
+
+      - name: Self-test of the published app
+        shell: pwsh
+        run: |
+          $p = Start-Process out/app/RunnerTray.exe -ArgumentList '--selftest' -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "Self-test failed with exit code $($p.ExitCode)" }
+
+      - name: Build installer and update packages (Velopack)
+        shell: pwsh
+        run: |
+          dotnet tool install -g vpk --version 1.2.161
+          # Previous release, so vpk can build a small delta update. Not available for the first release.
+          if ('${{ github.event_name }}' -eq 'workflow_dispatch') { New-Item -ItemType Directory -Force releases | Out-Null } else {
+          vpk download github --repoUrl https://github.com/${{ github.repository }} --token ${{ github.token }} -o releases
+          if ($LASTEXITCODE -ne 0) { Write-Host "No earlier Velopack release; building a full package only." ; $global:LASTEXITCODE = 0 } }
+          $notes = "release-notes.md"
+          $section = (Get-Content CHANGELOG.md -Raw) -split "(?m)^## " | Where-Object { $_ -match "^\[?$env:VERSION\]?" } | Select-Object -First 1
+          if ($section) { "## " + $section | Set-Content $notes } else { "RunnerTray $env:VERSION" | Set-Content $notes }
+          vpk pack --packId RunnerTray --packVersion $env:VERSION --packDir out/app --mainExe RunnerTray.exe `
+            --packTitle RunnerTray --packAuthors "RunnerTray contributors" --icon assets/app.ico `
+            --releaseNotes $notes -o releases
+
+      - name: Portable zip (one exe, no installer, no automatic updates)
+        shell: pwsh
+        run: |
+          dotnet publish src/RunnerTray -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:PublishReadyToRun=false `
+            -p:Version=$env:VERSION -o out/portable
+          Compress-Archive out/portable/RunnerTray.exe, README.md, LICENSE RunnerTray-$env:VERSION-win-x64-portable.zip
+
+      - name: Upload dry-run output
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: runnertray-${{ env.VERSION }}
+          path: |
+            releases/*
+            RunnerTray-*-portable.zip
+            release-notes.md
+
+      - name: Publish the GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create ${{ github.ref_name }} RunnerTray-win-x64.zip RunnerTray-win-x64-small.zip --generate-notes --title "RunnerTray ${{ github.ref_name }}"
+        run: |
+          vpk upload github --repoUrl https://github.com/${{ github.repository }} --token $env:GH_TOKEN `
+            -o releases --publish --releaseName "RunnerTray $env:VERSION" --tag ${{ github.ref_name }}
+          gh release upload ${{ github.ref_name }} RunnerTray-$env:VERSION-win-x64-portable.zip --clobber
+          gh release edit ${{ github.ref_name }} --notes-file release-notes.md

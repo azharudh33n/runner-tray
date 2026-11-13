@@ -9,15 +9,22 @@ internal sealed class PopupForm : Form
     private readonly Label _status;
     private readonly Button _refresh;
     private readonly SummaryControl _summary;
-    private readonly Label _error;
+    private readonly Banner _banner;
     private readonly Panel _viewport;
     private readonly FlowLayoutPanel _list;
     private readonly System.Windows.Forms.Timer _tick;
 
+    private readonly List<RowControl> _noticeRows = new();
     private Snapshot? _snapshot;
     private IReadOnlyList<LocalJob> _local = Array.Empty<LocalJob>();
 
     public event EventHandler? RefreshRequested;
+
+    /// <summary>The user chose the action in the banner (sign in, install, retry, ...).</summary>
+    public event EventHandler<BannerAction>? BannerActionRequested;
+
+    /// <summary>Problem with config.json, shown in the banner until fixed.</summary>
+    public string? ConfigError { get; set; }
 
     public DateTime LastHidden { get; private set; }
 
@@ -70,11 +77,8 @@ internal sealed class PopupForm : Form
         header.Controls.Add(_summary, 0, 2);
         header.SetColumnSpan(_summary, 2);
 
-        _error = new Label
-        {
-            Dock = DockStyle.Top, AutoSize = false, Visible = false, BackColor = Theme.ErrorBg, ForeColor = Theme.Fg,
-            Padding = new Padding(14, 6, 14, 6), Font = Theme.Small, AccessibleRole = AccessibleRole.Alert,
-        };
+        _banner = new Banner { Dock = DockStyle.Top, Visible = false };
+        _banner.ActionClicked += (_, a) => BannerActionRequested?.Invoke(this, a);
 
         // The list is wider than its viewport, so the light Windows scrollbar is clipped away.
         // Scrolling works with the mouse wheel, and keyboard focus scrolls the focused row into view.
@@ -90,7 +94,7 @@ internal sealed class PopupForm : Form
 
         // Docking runs in reverse order of adding: header first, then error, then the list fills the rest.
         Controls.Add(_viewport);
-        Controls.Add(_error);
+        Controls.Add(_banner);
         Controls.Add(header);
 
         _tick = new System.Windows.Forms.Timer { Interval = 1000 };
@@ -136,6 +140,12 @@ internal sealed class PopupForm : Form
     /// <summary>Give keyboard focus to the first item, so Tab and arrow keys work at once.</summary>
     public void FocusFirst()
     {
+        if (_banner.Visible && _banner.ActionButton.Visible)
+        {
+            _banner.ActionButton.Focus();
+            return;
+        }
+
         var first = _list.Controls.OfType<RowControl>().FirstOrDefault(r => r.TabStop);
         if (first is not null) first.Focus();
         else _refresh.Focus();
@@ -202,7 +212,8 @@ internal sealed class PopupForm : Form
         if (s is not null)
         {
             _title.Text = $"RunnerTray  ·  {s.Owner}";
-            _status.Text = $"Updated {s.At:HH:mm:ss}   ·   {s.Runs.Count} recent runs   ·   F5 refresh, Esc close";
+            _status.Text = (s.Stale && s.DataAt is { } dataAt ? $"Showing data from {dataAt.ToLocalTime():HH:mm}" : $"Updated {s.At.ToLocalTime():HH:mm:ss}")
+                           + $"   ·   {s.Runs.Count} recent runs   ·   F5 refresh, Esc close";
 
             var running = s.Runs.Count(r => r.State == RunState.Running);
             var queued = s.Runs.Count(r => r.State == RunState.Queued);
@@ -223,10 +234,19 @@ internal sealed class PopupForm : Form
 
             _summary.Parts = parts;
 
-            _error.Visible = s.Error is not null;
-            _error.Text = s.Error is null ? "" : "Could not reach GitHub: " + s.Error;
-            _error.Height = s.Error is null ? 0 : LogicalToDeviceUnits(Theme.Scaled(32));
+            UpdateBanner(s);
+
+            foreach (var notice in s.Notices)
+            {
+                _noticeRows.Add(new RowControl
+                {
+                    Compact = true, Dot = Theme.Yellow, Glyph = Glyph.Bang, StateWords = "Note", Title = notice,
+                });
+            }
         }
+
+        foreach (var row in _noticeRows) AddRow(row);
+        _noticeRows.Clear();
 
         // 1. Runner containers on this machine.
         if (_local.Count > 0)
@@ -310,14 +330,57 @@ internal sealed class PopupForm : Form
         if (hadFocus && Visible) FocusFirst();
     }
 
-    /// <summary>Runs whose latest run for the same workflow and branch failed.</summary>
-    public static List<RunInfo> Failing(IEnumerable<RunInfo> runs) => runs
-        .Where(r => r.State is not RunState.Queued and not RunState.Running)
-        .GroupBy(r => (r.Repo, r.Workflow, r.Branch))
-        .Select(g => g.OrderByDescending(r => r.Created).First())
-        .Where(r => r.State == RunState.Failure)
-        .ToList();
+    /// <summary>One banner at a time, most important first, each with a way out.</summary>
+    private void UpdateBanner(Snapshot s)
+    {
+        string? text = null;
+        BannerAction? action = null;
+        var urgent = true;
+        if (ConfigError is not null)
+        {
+            text = ConfigError;
+            action = BannerAction.Settings;
+        }
+        else switch (s.Failure)
+        {
+            case FailureKind.SignInRequired:
+                text = "Sign in to GitHub to see your runs.";
+                action = BannerAction.SignIn;
+                urgent = false;
+                break;
+            case FailureKind.RateLimited:
+                text = s.RetryAt is { } retry
+                    ? $"GitHub rate limit reached. RunnerTray waits until {retry.ToLocalTime():HH:mm}."
+                    : "GitHub rate limit reached. RunnerTray waits and tries again.";
+                break;
+            case FailureKind.Offline:
+                text = s.DataAt is { } at ? $"Offline. Showing data from {at.ToLocalTime():HH:mm}." : "Offline. No data yet.";
+                action = BannerAction.Retry;
+                break;
+            case FailureKind.ServerError:
+                text = "GitHub is having problems. RunnerTray keeps trying.";
+                action = BannerAction.Status;
+                break;
+            case FailureKind.None:
+                if (s.InstallUrl is not null)
+                {
+                    text = $"Install RunnerTray on {s.Owner} to see its repositories.";
+                    action = BannerAction.Install;
+                    urgent = false;
+                }
 
+                break;
+            default:
+                text = s.Error ?? "Something went wrong.";
+                action = BannerAction.Diagnostics;
+                break;
+        }
+
+        _banner.Show(text, action, urgent);
+    }
+
+    /// <summary>Runs whose latest run for the same workflow and branch failed.</summary>
+    public static List<RunInfo> Failing(IEnumerable<RunInfo> runs) => RunLogic.Failing(runs);
     private void AddSection(string text)
     {
         _list.Controls.Add(new Label
@@ -440,4 +503,75 @@ internal sealed class SummaryControl : Control
                 TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
         }
     }
+}
+
+public enum BannerAction { SignIn, Install, Retry, Status, Settings, Diagnostics }
+
+/// <summary>A message line under the header with one action button. Announced to screen readers.</summary>
+internal sealed class Banner : Panel
+{
+    private readonly Label _text;
+    private readonly Button _button;
+    private BannerAction? _action;
+
+    public Banner()
+    {
+        AutoSize = true;
+        AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        Padding = new Padding(14, 8, 10, 8);
+        var layout = new TableLayoutPanel { Dock = DockStyle.Fill, AutoSize = true, ColumnCount = 2, BackColor = Color.Transparent };
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        _text = new Label { AutoSize = true, Font = Theme.Small, ForeColor = Theme.Fg, Anchor = AnchorStyles.Left, Margin = new Padding(0, 4, 8, 4) };
+        _button = new Button
+        {
+            AutoSize = true, FlatStyle = FlatStyle.Flat, Font = Theme.Small, ForeColor = Theme.Fg, BackColor = Theme.Surface,
+            Anchor = AnchorStyles.Right, MinimumSize = new Size(Theme.Scaled(28), Theme.Scaled(28)), Cursor = Cursors.Hand,
+        };
+        _button.FlatAppearance.BorderColor = Theme.Border;
+        _button.Click += (_, _) => { if (_action is { } a) ActionClicked?.Invoke(this, a); };
+        layout.Controls.Add(_text, 0, 0);
+        layout.Controls.Add(_button, 1, 0);
+        Controls.Add(layout);
+        Resize += (_, _) => _text.MaximumSize = new Size(Math.Max(100, Width - _button.Width - Padding.Horizontal - 24), 0);
+    }
+
+    public event EventHandler<BannerAction>? ActionClicked;
+
+    public void Show(string? text, BannerAction? action, bool urgent)
+    {
+        if (text is null)
+        {
+            Visible = false;
+            return;
+        }
+
+        var changed = text != _text.Text;
+        BackColor = urgent ? Theme.ErrorBg : Theme.Surface;
+        _text.Text = text;
+        _action = action;
+        _button.Visible = action is not null;
+        _button.Text = action switch
+        {
+            BannerAction.SignIn => "Sign in with GitHub",
+            BannerAction.Install => "Install",
+            BannerAction.Retry => "Try again",
+            BannerAction.Status => "GitHub status",
+            BannerAction.Settings => "Open settings",
+            BannerAction.Diagnostics => "Details",
+            _ => "",
+        };
+        AccessibleRole = AccessibleRole.Alert;
+        AccessibleName = text;
+        Visible = true;
+        if (changed && IsHandleCreated)
+        {
+            // Screen readers announce the new message (WCAG 4.1.3 Status messages).
+            AccessibilityObject.RaiseAutomationNotification(
+                System.Windows.Forms.Automation.AutomationNotificationKind.Other,
+                System.Windows.Forms.Automation.AutomationNotificationProcessing.ImportantMostRecent, text);
+        }
+    }
+
+    public Button ActionButton => _button;
 }

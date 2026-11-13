@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Starts the real RunnerTray.exe in demo mode and checks it through Windows UI Automation. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>RunnerTray.UiTests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <PackageReference Include="FlaUI.UIA3" Version="5.0.0" />
+    <PackageReference Include="Axe.Windows" Version="2.4.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Build the app first; the tests start its exe. -->
+    <ProjectReference Include="..\..\src\RunnerTray\RunnerTray.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+</Project>

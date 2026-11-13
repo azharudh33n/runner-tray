@@ -31,7 +31,8 @@ The screenshots use made-up demo data (`RunnerTray.exe --demo`).
 
   ![Notification for a failed run](docs/notification.png)
 
-- **Start with Windows** from the right-click menu.
+- **Sign in with GitHub** in under a minute: no terminal, no token to create.
+- **Settings** and **Diagnostics** windows, automatic updates, and **Start with Windows**.
 
 <img src="docs/popup.png" alt="The RunnerTray panel: summary, jobs on this machine, and recent runs" width="400">
 
@@ -52,6 +53,9 @@ applies to a desktop app.
 | 2.4.3, 2.4.7 Focus order and focus visible | Focus moves top to bottom and has a clear ring. |
 | 4.1.2 Name, role, value | Each row tells screen readers its status, repository, workflow, branch, and time, for example "Failed. atlas-mobile, Android release. release/3.2, push, jlee. 8m ago". |
 | 2.2.2 Pause, stop, hide | Nothing flashes or animates. Only the timers count up. |
+| 4.1.3 Status messages | Problems and sign-in progress are announced to screen readers. |
+
+Every build runs [Axe.Windows](https://github.com/microsoft/axe-windows) on the panel, Settings, Sign in, and Diagnostics windows (0 errors required), and UI Automation tests that read every row the way a screen reader does.
 
 ### Keyboard
 
@@ -66,39 +70,53 @@ applies to a desktop app.
 
 ## Install
 
-1. Download the latest release from the
-   [Releases page](../../releases):
-   - `RunnerTray-win-x64.zip`: one `.exe`, nothing else to install.
-   - `RunnerTray-win-x64-small.zip`: smaller, but needs the
-     [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0).
-2. Extract the zip to a folder, for example `C:\Tools\RunnerTray`.
-3. Sign in to GitHub. RunnerTray uses the [GitHub CLI](https://cli.github.com/)
-   token, so run this once:
+1. Download `RunnerTray-win-Setup.exe` from the [latest release](../../releases/latest).
+2. Run it. RunnerTray installs for your Windows user only (no administrator rights),
+   adds itself to the Start menu, and starts. The icon appears in the tray. Windows can
+   hide new tray icons behind the `^` arrow; drag the icon onto the taskbar to keep it
+   in view.
+3. Click the icon, then **Sign in with GitHub** (see below).
 
-   ```bash
-   gh auth login
-   ```
+RunnerTray updates itself from GitHub Releases. Turn this off in **Settings**.
+Uninstall it from **Settings > Apps > Installed apps**.
 
-   To see an organization's self-hosted runners, the token also needs the
-   `admin:org` scope:
+**Portable:** `RunnerTray-<version>-win-x64-portable.zip` contains one `.exe`. Extract it
+anywhere and run it. The portable version does not update itself.
 
-   ```bash
-   gh auth refresh -h github.com -s admin:org
-   ```
+**Windows SmartScreen:** RunnerTray is not code-signed yet, so Windows may show
+"Windows protected your PC" the first time. Select **More info**, then **Run anyway**.
+You can check the download against the build log of the
+[Release workflow](../../actions/workflows/release.yml), which builds it from this
+source code.
 
-   If you do not use the GitHub CLI, set the `GITHUB_TOKEN` environment variable
-   to a token instead.
-4. Start `RunnerTray.exe`. The icon appears in the tray. Windows can hide new
-   tray icons behind the `^` arrow; drag the icon onto the taskbar to keep it
-   visible.
-5. Right-click the icon and select **Start with Windows** to start it when you
-   sign in.
+Try it without a GitHub account: `RunnerTray.exe --demo`.
 
-Try it without a GitHub account:
+## Sign in
 
-```bash
-RunnerTray.exe --demo
-```
+<img src="docs/sign-in.png" alt="Sign in with GitHub window with a one-time code" width="420">
+
+1. Click **Sign in with GitHub** in the panel (or right-click the icon, then **Sign in with GitHub**).
+2. Select **Copy code and open GitHub**, paste the code on the GitHub page, and select **Authorize**.
+3. To see an organization's repositories, select **Install** in the panel when RunnerTray
+   asks, and choose the organization. An organization owner may have to approve it.
+
+RunnerTray uses the [RunnerTray GitHub App](https://github.com/apps/runnertray). It can only
+read, never change anything:
+
+| Permission | Access | Used for |
+|---|---|---|
+| Actions | Read | Workflow runs |
+| Metadata | Read | Repository names (required by GitHub) |
+| Self-hosted runners (organization) | Read | Runner status; organization admins only |
+
+Your sign-in is saved in Windows Credential Manager (encrypted for your Windows user) and
+renewed automatically for up to 6 months. To sign out, right-click the icon, then
+**Sign out**. To remove the access completely, also revoke it in
+[GitHub > Settings > Applications](https://github.com/settings/apps/authorizations).
+
+**Already use the GitHub CLI?** RunnerTray uses your `gh auth login` automatically if you have
+not signed in, and also a `GITHUB_TOKEN` environment variable. For an organization's runner
+list with the CLI, run `gh auth refresh -h github.com -s admin:org`.
 
 ## Use
 
@@ -109,63 +127,71 @@ RunnerTray.exe --demo
 | Click a busy runner on this machine | Open the repository's Actions page |
 | **Refresh** in the panel, or F5 | Refresh now |
 | Esc, or click elsewhere | Close the panel |
-| Right-click the tray icon | Menu: refresh, open in GitHub, settings, start with Windows, exit |
+| Right-click the tray icon | Menu: refresh, sign in or out, open in GitHub, settings, diagnostics, start with Windows, update, exit |
 
-## Configuration
+When something is wrong, a message at the top of the panel says what and offers the fix:
 
-The first start creates `%APPDATA%\RunnerTray\config.json`. Open it from
-**right-click → Settings**, save your changes, then restart RunnerTray.
+| Message | What RunnerTray does |
+|---|---|
+| Sign in to GitHub | **Sign in with GitHub** button |
+| Install RunnerTray on an organization | **Install** button |
+| Offline | Shows the last data with its time; tries again with growing pauses, and at once when the network returns |
+| GitHub rate limit reached | Waits until GitHub allows requests again |
+| GitHub is having problems | Keeps trying; **GitHub status** button |
+| The settings file has an error | Uses default settings until you fix it; **Open settings** button |
 
-```json
-{
-  "owner": "my-org",
-  "repos": [],
-  "lookbackDays": 2,
-  "runCount": 15,
-  "refreshSeconds": 60,
-  "showSelfHostedRunners": true,
-  "runnerNameFilter": "",
-  "dockerJobLabel": "",
-  "dockerWorkDir": "/actions-runner/_work",
-  "notifyOnFailure": true,
-  "notifyOnSuccess": false
-}
-```
+## Settings
+
+<img src="docs/settings.png" alt="Settings window" width="420">
+
+Right-click the icon, then **Settings**. Changes apply at once. The settings are saved in
+`%APPDATA%\RunnerTray\config.json`; if you edit that file by hand, RunnerTray reloads it.
 
 | Setting | Default | Meaning |
 |---|---|---|
-| `owner` | your user | GitHub user or organization to watch. |
-| `repos` | all | Repositories to watch, for example `["web-app", "api"]`. Empty: every repository with a push in the last `lookbackDays` days. |
-| `lookbackDays` | `2` | How far back to look for active repositories. |
-| `runCount` | `15` | Number of runs in the panel. |
-| `refreshSeconds` | `60` | How often to ask GitHub for new data (minimum 15). |
-| `showSelfHostedRunners` | `true` | Show the organization's self-hosted runners. Needs `admin:org`. |
-| `runnerNameFilter` | all | Only show runners whose name contains this text. |
-| `dockerJobLabel` | off | Docker label of runner containers on this PC, for example `ci-job=build-box`. Turns on the **This machine** section. |
-| `dockerWorkDir` | `/actions-runner/_work` | Runner work folder inside those containers. |
-| `notifyOnFailure` | `true` | Notification when a run fails. |
-| `notifyOnSuccess` | `false` | Notification when a run passes. |
-
-GitHub allows 5,000 API requests per hour. RunnerTray makes one request per
-watched repository per refresh, so 20 repositories at 60 seconds use about
-1,200 requests per hour.
+| Owner | you | GitHub user or organization to watch. |
+| Repositories | all | Names to watch. Empty: every repository with a push in the last *Look back* days (at most 40). |
+| Look back (days) | 2 | How far back to look for active repositories. |
+| Runs shown | 15 | Number of runs in the panel. |
+| Refresh when idle | 60 s | While runs are active, RunnerTray refreshes every 15 s. After 30 quiet minutes, every 5 minutes. |
+| Self-hosted runners | on | Show the organization's runners (organization admins only). |
+| Runner name contains | all | Only show runners whose name contains this text. |
+| Docker label on this PC | off | Label of runner containers on this PC, for example `ci-job=build-box`. Turns on **This machine**. |
+| Runner work folder | `/actions-runner/_work` | Work folder inside those containers. |
+| Notifications | failures | Notify when a run fails, passes, or both. |
+| Start with Windows | off | Start RunnerTray when you sign in to Windows. |
+| Install updates automatically | on | Installed version only. |
 
 ### Runner containers on this PC
 
 If you run GitHub Actions runners in Docker on the same PC (for example with
-[myoung34/docker-github-actions-runner](https://github.com/myoung34/docker-github-actions-runner)
-or your own launcher), give the containers a label and set `dockerJobLabel` to
-it. RunnerTray reads the runner log (`Running job: …`) and the checked-out
-folder in `dockerWorkDir` to show the repository and job. It refreshes this
+[myoung34/docker-github-actions-runner](https://github.com/myoung34/docker-github-actions-runner)),
+give the containers a label and enter it in **Docker label on this PC**. RunnerTray reads the
+runner log (`Running job: …`) and the checked-out folder to show the repository and job,
 every 5 seconds. Docker must be on your `PATH`.
+
+## How RunnerTray uses the GitHub API
+
+RunnerTray follows GitHub's [REST API best practices](https://docs.github.com/en/rest/using-the-rest-api/best-practices-for-using-the-rest-api):
+
+- One request at a time, never in parallel.
+- Conditional requests (ETags). When nothing changed, GitHub answers "304 Not Modified",
+  which does not count against your rate limit. Most refreshes cost nothing.
+- Obeys `retry-after`, `x-ratelimit-reset`, and `x-poll-interval`; backs off on errors.
+- Pauses while your screen is locked or the PC sleeps.
+
+**Diagnostics** (right-click the icon) shows the rate limit left, the number of requests and
+cache hits, and recent errors. **Copy** puts the report on the clipboard for a bug report; it
+contains no tokens.
 
 ## Privacy
 
-RunnerTray talks only to `api.github.com`, and to your local Docker engine if
-you turn that on. It reads your token from the GitHub CLI or `GITHUB_TOKEN` at
-start and keeps it in memory only. It stores nothing except `config.json`.
+RunnerTray talks only to `github.com` and `api.github.com`, and to your local Docker engine if
+you turn that on. It sends no telemetry. On your PC it keeps: your sign-in (Windows Credential
+Manager), settings (`%APPDATA%\RunnerTray`), and a cache, the last data, and logs
+(`%LOCALAPPDATA%\RunnerTray`). Logs never contain tokens.
 
-## Build from source
+## Build and test
 
 Needs the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) on Windows.
 
@@ -178,33 +204,44 @@ cd runner-tray
 ```
 
 ```bash
+dotnet build RunnerTray.sln -c Release
+```
+
+```bash
+dotnet test RunnerTray.sln -c Release
+```
+
+```bash
 dotnet run --project src/RunnerTray -- --demo
 ```
 
-Publish a single `.exe`:
+| Command | Purpose |
+|---|---|
+| `RunnerTray.exe --demo` | Made-up data, no account needed |
+| `RunnerTray.exe --selftest` | Opens every window once and exits; exit code 0 means OK |
+| `RunnerTray.exe --screenshot docs` | Renders the README images from demo data |
 
-```bash
-dotnet publish src/RunnerTray -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish
-```
+**Tests:** `tests/RunnerTray.Tests` covers the GitHub client, sign-in, settings, and every
+failure in the table above with a fake GitHub. `tests/RunnerTray.UiTests` starts the real app
+and checks it with UI Automation and Axe.Windows. Both run on every push, with CodeQL.
 
-Render the README images from demo data:
-
-```bash
-dotnet run --project src/RunnerTray -- --screenshot docs
-```
-
-Recreate the app icon: `pwsh tools/make-icon.ps1`.
+**Release:** push a tag such as `v1.0.1`. The [Release workflow](.github/workflows/release.yml)
+tests, builds the installer with [Velopack](https://velopack.io) and the portable zip, and
+publishes the GitHub release that installed copies update from.
 
 ## Project layout
 
 | Path | Contents |
 |---|---|
-| `src/RunnerTray/TrayApp.cs` | Tray icon, timers, notifications, menu |
+| `src/RunnerTray.Core/ApiClient.cs` | GitHub REST client: request queue, ETag cache, rate limits, retries |
+| `src/RunnerTray.Core/GitHubSource.cs` | Reads runs, repositories and runners |
+| `src/RunnerTray.Core/DeviceFlow.cs` | Sign in with GitHub (device flow) |
+| `src/RunnerTray.Core/SignedInTokenSource.cs` | Token storage and refresh |
+| `src/RunnerTray.Core/PollPolicy.cs` | When to refresh |
+| `src/RunnerTray/TrayApp.cs` | Tray icon, scheduling, notifications, menu |
 | `src/RunnerTray/PopupForm.cs` | The panel |
-| `src/RunnerTray/GitHubSource.cs` | GitHub REST API client |
-| `src/RunnerTray/LocalDocker.cs` | Runner containers on this PC |
-| `src/RunnerTray/DemoSource.cs` | Demo data for `--demo` and screenshots |
-| `src/RunnerTray/AppConfig.cs` | `config.json` |
+| `src/RunnerTray/SignInForm.cs`, `SettingsForm.cs`, `DiagnosticsForm.cs` | Windows |
+| `tests/` | Unit, scenario, UI and accessibility tests |
 
 ## License
 

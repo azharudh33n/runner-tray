@@ -4,15 +4,18 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <AssemblyName>RunnerTray</AssemblyName>
     <RootNamespace>RunnerTray</RootNamespace>
-    <Version>0.1.0</Version>
     <Product>RunnerTray</Product>
     <Description>GitHub Actions runs and self-hosted runners in your Windows system tray.</Description>
     <ApplicationIcon>..\..\assets\app.ico</ApplicationIcon>
+    <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RunnerTray.Core\RunnerTray.Core.csproj" />
+    <PackageReference Include="Velopack" Version="1.2.161" />
+  </ItemGroup>
 
 </Project>

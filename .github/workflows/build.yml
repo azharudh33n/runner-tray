@@ -2,15 +2,45 @@ name: Build
 
 on:
   push:
-    branches: [main]
+    branches: ["**"]
+    tags-ignore: ["**"]
   pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-      - run: dotnet build src/RunnerTray -c Release -warnaserror
+
+      - name: Build (analyzers on, warnings are errors)
+        run: dotnet build RunnerTray.sln -c Release
+
+      - name: Unit and scenario tests
+        run: dotnet test tests/RunnerTray.Tests -c Release --no-build --collect:"XPlat Code Coverage" --results-directory coverage
+
+      - name: UI and accessibility tests (FlaUI, Axe.Windows)
+        run: dotnet test tests/RunnerTray.UiTests -c Release --no-build
+
+      - name: Self-test of the app
+        shell: pwsh
+        run: |
+          $p = Start-Process src/RunnerTray/bin/Release/net8.0-windows/RunnerTray.exe -ArgumentList '--selftest' -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "Self-test failed with exit code $($p.ExitCode)" }
+
+      - name: Coverage summary
+        if: always()
+        shell: pwsh
+        run: |
+          $file = Get-ChildItem coverage -Recurse -Filter coverage.cobertura.xml | Select-Object -First 1
+          if ($file) {
+            [xml]$x = Get-Content $file.FullName
+            $rate = [math]::Round([double]$x.coverage.'line-rate' * 100, 1)
+            "Line coverage (RunnerTray.Core): $rate%" | Tee-Object -Append -FilePath $env:GITHUB_STEP_SUMMARY
+          }

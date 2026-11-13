@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Logic without UI: GitHub API client, sign-in, data sources, configuration. Covered by unit tests. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <RootNamespace>RunnerTray</RootNamespace>
+    <AssemblyName>RunnerTray.Core</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="RunnerTray.Tests" />
+  </ItemGroup>
+
+</Project>

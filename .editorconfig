@@ -1,0 +1,41 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+
+[*.{yml,yaml,json,md,props,csproj}]
+indent_size = 2
+
+[*.cs]
+# The app is English only; no resource files.
+dotnet_diagnostic.CA1303.severity = none
+# Desktop app: async continuations must return to the UI thread.
+dotnet_diagnostic.CA2007.severity = none
+# Simple file logger, not Microsoft.Extensions.Logging.
+dotnet_diagnostic.CA1848.severity = none
+# Top-level handlers catch everything on purpose so the app never crashes; each such catch is commented.
+dotnet_diagnostic.CA1031.severity = none
+# Culture: all formatted strings are shown to the user in their own culture or are invariant protocol values.
+dotnet_diagnostic.CA1305.severity = none
+dotnet_diagnostic.CA1304.severity = none
+dotnet_diagnostic.CA1311.severity = none
+# URLs are built as strings for the GitHub REST API.
+dotnet_diagnostic.CA1056.severity = none
+dotnet_diagnostic.CA1054.severity = none
+dotnet_diagnostic.CA2234.severity = none
+dotnet_diagnostic.CA1055.severity = none
+# Records and DTOs expose lists.
+dotnet_diagnostic.CA1002.severity = none
+dotnet_diagnostic.CA2227.severity = none
+dotnet_diagnostic.CA1819.severity = none
+# Test method names use underscores.
+dotnet_diagnostic.CA1707.severity = none
+# Exception types are internal to this app and need only the constructors they use.
+dotnet_diagnostic.CA1032.severity = none
+dotnet_diagnostic.CA1064.severity = none
+# Constant arrays in rarely called code (demo data, process arguments).
+dotnet_diagnostic.CA1861.severity = none
