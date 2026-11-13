@@ -35,7 +35,7 @@ internal sealed class SettingsForm : Form
         AutoSizeMode = AutoSizeMode.GrowAndShrink;
         Font = new Font("Segoe UI", 9.5f * Theme.TextScale);
         Padding = new Padding(16);
-        Icon = Icons.Get(TrayState.Busy);
+        Icon = AppIcon.Value;
 
         var grid = new TableLayoutPanel { AutoSize = true, ColumnCount = 2, Dock = DockStyle.Fill };
         grid.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
@@ -96,7 +96,7 @@ internal sealed class SettingsForm : Form
         _autoUpdate.Enabled = updatesAvailable;
         if (!updatesAvailable)
         {
-            _autoUpdate.Text += " (installed version only)";
+            _autoUpdate.Text += " (release version only)";
         }
 
         var buttons = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.RightToLeft, Dock = DockStyle.Fill, Margin = new Padding(0, 16, 0, 0) };

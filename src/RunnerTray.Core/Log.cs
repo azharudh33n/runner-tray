@@ -15,7 +15,7 @@ public static partial class Log
 
     /// <summary>Folder for log files. Tests point this at a temporary folder.</summary>
     public static string Dir { get; set; } =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RunnerTray", "logs");
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), DataFolder.Name, "logs");
 
     public static bool Enabled { get; set; } = true;
 

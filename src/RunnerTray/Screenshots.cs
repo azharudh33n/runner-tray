@@ -38,6 +38,11 @@ internal static class Screenshots
         using var hero = Hero(panel);
         hero.Save(Path.Combine(folder, "hero.png"), ImageFormat.Png);
 
+        using (var social = Social(panel, Path.Combine(folder, "..", "assets", "logo-1024.png")))
+        {
+            social.Save(Path.Combine(folder, "social.png"), ImageFormat.Png);
+        }
+
         using var states = States();
         states.Save(Path.Combine(folder, "tray-states.png"), ImageFormat.Png);
 
@@ -222,5 +227,54 @@ internal static class Screenshots
         form.DrawToBitmap(bmp, new Rectangle(Point.Empty, form.Size));
         bmp.Save(path, ImageFormat.Png);
         form.Close();
+    }
+
+    /// <summary>1280 x 640 image for link previews (GitHub, Google, social sites).</summary>
+    private static Bitmap Social(Bitmap panel, string logoPath)
+    {
+        const int w = 1280, h = 640;
+        var bmp = new Bitmap(w, h);
+        using var g = Graphics.FromImage(bmp);
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+        using (var bg = new LinearGradientBrush(new Rectangle(0, 0, w, h), Color.FromArgb(16, 26, 54), Color.FromArgb(9, 12, 22), 30f))
+        {
+            g.FillRectangle(bg, 0, 0, w, h);
+        }
+
+        Glow(g, new RectangleF(600, -300, 900, 800), Color.FromArgb(60, 31, 111, 235));
+        Glow(g, new RectangleF(-200, 300, 700, 600), Color.FromArgb(28, 63, 185, 80));
+
+        if (File.Exists(logoPath))
+        {
+            using var logo = Image.FromFile(logoPath);
+            g.DrawImage(logo, 72, 88, 128, 128);
+        }
+
+        using var big = new Font("Segoe UI Semibold", 52f);
+        using var mid = new Font("Segoe UI", 22f);
+        using var small = new Font("Segoe UI", 15f);
+        TextRenderer.DrawText(g, "RunnerTray", big, new Point(64, 236), Color.White);
+        TextRenderer.DrawText(g, "GitHub Actions status in your\nWindows system tray", mid,
+            new Rectangle(70, 338, 620, 130), Color.FromArgb(201, 209, 217), TextFormatFlags.WordBreak);
+        TextRenderer.DrawText(g, "Free · Open source · Windows 10 and 11", small, new Point(72, 470), Color.FromArgb(157, 167, 179));
+        TextRenderer.DrawText(g, "github.com/azharudh33n/runner-tray", small, new Point(72, 548), Color.FromArgb(121, 192, 255));
+
+        // Panel on the right, slightly cut off at the bottom, with a shadow.
+        var scale = 560f / panel.Height;
+        var pw = (int)(panel.Width * scale);
+        var rect = new RectangleF(w - pw - 80, 70, pw, 560);
+        Shadow(g, rect, 12);
+        using (var clip = Theme.Rounded(rect, 12))
+        {
+            g.SetClip(clip);
+            g.DrawImage(panel, rect);
+            g.ResetClip();
+            using var border = new Pen(Theme.Border);
+            g.DrawPath(border, clip);
+        }
+
+        return bmp;
     }
 }

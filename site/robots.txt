@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://azharudh33n.github.io/runner-tray/sitemap.xml

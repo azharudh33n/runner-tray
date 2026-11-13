@@ -31,7 +31,7 @@ internal sealed class SignInForm : Form
         AutoSizeMode = AutoSizeMode.GrowAndShrink;
         Font = new Font("Segoe UI", 10f * Theme.TextScale);
         Padding = new Padding(20);
-        Icon = Icons.Get(TrayState.Busy);
+        Icon = AppIcon.Value;
 
         var layout = new TableLayoutPanel { AutoSize = true, ColumnCount = 1, Dock = DockStyle.Fill };
         var intro = new Label

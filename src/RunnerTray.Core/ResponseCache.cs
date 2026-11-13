@@ -26,7 +26,7 @@ public sealed class ResponseCache
     }
 
     public static string DefaultDir =>
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RunnerTray", "cache");
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), DataFolder.Name, "cache");
 
     public int Count
     {

@@ -15,7 +15,7 @@ internal sealed class DiagnosticsForm : Form
         Font = new Font("Segoe UI", 9.5f * Theme.TextScale);
         ClientSize = new Size(Theme.Scaled(640), Theme.Scaled(480));
         MinimumSize = new Size(400, 300);
-        Icon = Icons.Get(TrayState.Busy);
+        Icon = AppIcon.Value;
 
         _text = new TextBox
         {

@@ -11,7 +11,7 @@ public static class SnapshotStore
     private sealed record Saved(string Owner, bool OwnerIsOrg, List<RunInfo> Runs, List<RunnerInfo> Runners, DateTimeOffset DataAt);
 
     public static string DefaultPath =>
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "RunnerTray", "last.json");
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), DataFolder.Name, "last.json");
 
     public static void Save(Snapshot s, string? path = null)
     {

@@ -1,12 +1,32 @@
-# RunnerTray
+<p align="center">
+  <img src="assets/logo-256.png" alt="RunnerTray logo" width="112">
+</p>
 
-GitHub Actions runs and self-hosted runners in your Windows system tray.
+<h1 align="center">RunnerTray: GitHub Actions status in your Windows system tray</h1>
 
-![RunnerTray popup above the Windows taskbar](docs/hero.png)
+<p align="center">
+  <a href="https://github.com/azharudh33n/runner-tray/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/azharudh33n/runner-tray?label=release"></a>
+  <a href="https://github.com/azharudh33n/runner-tray/actions/workflows/build.yml"><img alt="Build" src="https://github.com/azharudh33n/runner-tray/actions/workflows/build.yml/badge.svg"></a>
+  <a href="https://github.com/azharudh33n/runner-tray/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/azharudh33n/runner-tray/total"></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/azharudh33n/runner-tray"></a>
+  <img alt="Windows 10 and 11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4">
+  <img alt="WCAG 2.2 AA" src="https://img.shields.io/badge/accessibility-WCAG%202.2%20AA-2ea44f">
+</p>
 
-RunnerTray is a small tray app for Windows 10 and 11. The tray icon shows the
-state of your CI at a glance. Click it to open a panel with the details. It does
-not open a console window or a browser tab.
+<p align="center">
+  <a href="https://github.com/azharudh33n/runner-tray/releases/latest/download/RunnerTray-win-Setup.exe"><b>Download for Windows</b></a> ·
+  <a href="https://azharudh33n.github.io/runner-tray/">Website</a> ·
+  <a href="#sign-in">Sign in</a> ·
+  <a href="#accessibility">Accessibility</a>
+</p>
+
+![RunnerTray panel with GitHub Actions runs above the Windows taskbar](docs/hero.png)
+
+**RunnerTray** is a free, open-source **GitHub Actions monitor for Windows**. It lives in the
+system tray and shows your **running, queued and failed workflow runs**, the status of your
+**self-hosted runners**, and a **desktop notification when a build fails**, so you stop
+refreshing the Actions tab. It works with personal accounts and organizations, signs in with
+GitHub in under a minute, and uses read-only access.
 
 The screenshots use made-up demo data (`RunnerTray.exe --demo`).
 
@@ -78,10 +98,11 @@ Every build runs [Axe.Windows](https://github.com/microsoft/axe-windows) on the 
 3. Click the icon, then **Sign in with GitHub** (see below).
 
 RunnerTray updates itself from GitHub Releases. Turn this off in **Settings**.
-Uninstall it from **Settings > Apps > Installed apps**.
+Uninstall it from **Settings > Apps > Installed apps**. Uninstalling also removes your saved
+sign-in, the Start with Windows entry, and the cache; your settings stay for a reinstall.
 
-**Portable:** `RunnerTray-<version>-win-x64-portable.zip` contains one `.exe`. Extract it
-anywhere and run it. The portable version does not update itself.
+**Portable:** `RunnerTray-win-Portable.zip`. Extract it anywhere and run `RunnerTray.exe`.
+No installation, and it updates itself too.
 
 **Windows SmartScreen:** RunnerTray is not code-signed yet, so Windows may show
 "Windows protected your PC" the first time. Select **More info**, then **Run anyway**.
@@ -160,7 +181,7 @@ Right-click the icon, then **Settings**. Changes apply at once. The settings are
 | Runner work folder | `/actions-runner/_work` | Work folder inside those containers. |
 | Notifications | failures | Notify when a run fails, passes, or both. |
 | Start with Windows | off | Start RunnerTray when you sign in to Windows. |
-| Install updates automatically | on | Installed version only. |
+| Install updates automatically | on | Installer and portable zip from a release. |
 
 ### Runner containers on this PC
 
@@ -189,7 +210,7 @@ contains no tokens.
 RunnerTray talks only to `github.com` and `api.github.com`, and to your local Docker engine if
 you turn that on. It sends no telemetry. On your PC it keeps: your sign-in (Windows Credential
 Manager), settings (`%APPDATA%\RunnerTray`), and a cache, the last data, and logs
-(`%LOCALAPPDATA%\RunnerTray`). Logs never contain tokens.
+(`%LOCALAPPDATA%\RunnerTray-data`). Logs never contain tokens.
 
 ## Build and test
 
@@ -226,7 +247,7 @@ failure in the table above with a fake GitHub. `tests/RunnerTray.UiTests` starts
 and checks it with UI Automation and Axe.Windows. Both run on every push, with CodeQL.
 
 **Release:** push a tag such as `v1.0.1`. The [Release workflow](.github/workflows/release.yml)
-tests, builds the installer with [Velopack](https://velopack.io) and the portable zip, and
+tests, builds the installer and the portable zip with [Velopack](https://velopack.io), and
 publishes the GitHub release that installed copies update from.
 
 ## Project layout

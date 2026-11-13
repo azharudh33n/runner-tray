@@ -18,7 +18,7 @@ First stable release.
 - Refreshes at once after unlock, wake from sleep, and when the network comes back.
 - Shows the last good data, marked with its time, when GitHub cannot be reached.
 - Clear messages with an action for every problem: sign in, install, offline, rate limit, GitHub outage, broken settings.
-- Errors never close the app; details go to a log (`%LOCALAPPDATA%\RunnerTray\logs`).
+- Errors never close the app; details go to a log (`%LOCALAPPDATA%\RunnerTray-data\logs`).
 
 **New windows**
 - Settings window (no more editing JSON by hand; the file still works and reloads automatically).
@@ -26,7 +26,8 @@ First stable release.
 
 **Install and updates**
 - `RunnerTray-win-Setup.exe` installs per user (no administrator rights) and updates itself from GitHub Releases.
-- Portable zip for use without installing.
+- `RunnerTray-win-Portable.zip` for use without installing; it updates itself too.
+- Uninstalling removes the saved sign-in, the Start with Windows entry, and the cache.
 
 **Accessibility**
 - Checked with Axe.Windows (0 errors) and Windows UI Automation tests on every build.

@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RunnerTray – GitHub Actions status in your Windows system tray</title>
+  <meta name="description" content="Free, open-source Windows tray app for GitHub Actions. See running and failed workflow runs, self-hosted runner status, and get failure notifications. Sign in with GitHub in a minute.">
+  <meta name="keywords" content="GitHub Actions, Windows tray app, system tray, CI status, workflow runs, self-hosted runners, build notifications, GitHub Actions monitor, desktop notifier, DevOps">
+  <meta name="author" content="RunnerTray contributors">
+  <meta name="theme-color" content="#0d1117">
+  <link rel="canonical" href="https://azharudh33n.github.io/runner-tray/">
+  <link rel="icon" type="image/svg+xml" href="logo.svg">
+  <link rel="icon" type="image/png" sizes="256x256" href="logo-256.png">
+  <link rel="apple-touch-icon" href="logo-256.png">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="RunnerTray">
+  <meta property="og:title" content="RunnerTray – GitHub Actions status in your Windows tray">
+  <meta property="og:description" content="See running and failed GitHub Actions runs and self-hosted runners from the Windows taskbar. Free and open source.">
+  <meta property="og:url" content="https://azharudh33n.github.io/runner-tray/">
+  <meta property="og:image" content="https://azharudh33n.github.io/runner-tray/social.png">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="640">
+  <meta property="og:image:alt" content="RunnerTray panel showing GitHub Actions runs above the Windows taskbar">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="RunnerTray – GitHub Actions status in your Windows tray">
+  <meta name="twitter:description" content="Running and failed workflow runs, self-hosted runners, and failure notifications in the Windows tray.">
+  <meta name="twitter:image" content="https://azharudh33n.github.io/runner-tray/social.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "RunnerTray",
+    "description": "Windows system tray app that shows GitHub Actions workflow runs, self-hosted runner status, and failure notifications.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Windows 10, Windows 11",
+    "softwareVersion": "1.0.0",
+    "license": "https://opensource.org/licenses/MIT",
+    "url": "https://azharudh33n.github.io/runner-tray/",
+    "downloadUrl": "https://github.com/azharudh33n/runner-tray/releases/latest/download/RunnerTray-win-Setup.exe",
+    "installUrl": "https://github.com/azharudh33n/runner-tray/releases/latest",
+    "image": "https://azharudh33n.github.io/runner-tray/social.png",
+    "screenshot": "https://azharudh33n.github.io/runner-tray/popup.png",
+    "codeRepository": "https://github.com/azharudh33n/runner-tray",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "accessibilityFeature": ["highContrastDisplay", "largePrint", "readingOrder", "structuralNavigation"],
+    "accessibilityControl": ["fullKeyboardControl", "fullMouseControl"]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is RunnerTray free?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. RunnerTray is free and open source under the MIT license." }
+      },
+      {
+        "@type": "Question",
+        "name": "What access does RunnerTray need to my GitHub account?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Read-only access through the RunnerTray GitHub App: Actions (read), Metadata (read), and organization Self-hosted runners (read). It cannot change code, settings, or runs." }
+      },
+      {
+        "@type": "Question",
+        "name": "Does RunnerTray work with self-hosted runners?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. It shows whether each organization runner is online, busy, or offline, and, for runners in Docker on your PC, which repository and job each one is running." }
+      },
+      {
+        "@type": "Question",
+        "name": "Will RunnerTray use up my GitHub API rate limit?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. It sends one request at a time and uses conditional requests, which do not count against the rate limit when nothing changed. It also pauses while the screen is locked." }
+      },
+      {
+        "@type": "Question",
+        "name": "Which Windows versions are supported?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Windows 10 and Windows 11, 64-bit. The installer needs no administrator rights." }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="top">
+    <a class="brand" href="./" aria-label="RunnerTray home">
+      <img src="logo.svg" alt="" width="32" height="32">
+      <span>RunnerTray</span>
+    </a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#sign-in">Sign in</a></li>
+        <li><a href="#accessibility">Accessibility</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="https://github.com/azharudh33n/runner-tray">GitHub</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="pulse" aria-hidden="true"></span> Free · Open source · Windows 10 and 11</p>
+        <h1 id="hero-title">GitHub Actions status in your <em>Windows tray</em>.</h1>
+        <p class="lede">RunnerTray shows your running and failed workflow runs, your self-hosted runners, and a notification when a build breaks. One glance at the taskbar instead of another browser tab.</p>
+        <div class="cta">
+          <a class="btn primary" href="https://github.com/azharudh33n/runner-tray/releases/latest/download/RunnerTray-win-Setup.exe">
+            Download for Windows
+            <span class="sub">RunnerTray-win-Setup.exe · no admin rights</span>
+          </a>
+          <a class="btn ghost" href="https://github.com/azharudh33n/runner-tray">View source on GitHub</a>
+        </div>
+        <p class="alt-install">No installer wanted? Get the <a href="https://github.com/azharudh33n/runner-tray/releases/latest/download/RunnerTray-win-Portable.zip">portable zip</a>.</p>
+      </div>
+
+      <div class="hero-shot">
+        <img class="panel" src="popup.png" width="480" height="640"
+             alt="RunnerTray panel: 2 running, 1 queued, 1 failing; jobs on this machine with timers; recent runs with repository, workflow, branch and author.">
+        <div class="taskbar" aria-hidden="true">
+          <img src="logo.svg" alt="" width="22" height="22">
+          <span class="clock">12:45</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="strip" aria-label="At a glance">
+      <ul>
+        <li><b>15 s</b><span>refresh while jobs run</span></li>
+        <li><b>0</b><span>rate limit used when nothing changed</span></li>
+        <li><b>3</b><span>read-only permissions</span></li>
+        <li><b>0</b><span>accessibility errors (Axe.Windows)</span></li>
+      </ul>
+    </section>
+
+    <section id="features" class="features" aria-labelledby="features-title">
+      <h2 id="features-title">Everything your CI is doing, without opening a browser</h2>
+      <div class="grid">
+        <article>
+          <h3><span class="badge run" aria-hidden="true"></span>Live runs</h3>
+          <p>Running and queued GitHub Actions runs across your repositories, with a live timer. Click a run to open it on GitHub.</p>
+        </article>
+        <article>
+          <h3><span class="badge fail" aria-hidden="true"></span>Failure notifications</h3>
+          <p>A Windows notification the moment a workflow fails. The tray icon turns red with a cross until the next run passes.</p>
+        </article>
+        <article>
+          <h3><span class="badge ok" aria-hidden="true"></span>Self-hosted runners</h3>
+          <p>See which organization runners are online, busy, or offline, with their labels. Runners in Docker on your PC show the repository and job they run.</p>
+        </article>
+        <article>
+          <h3><span class="badge wait" aria-hidden="true"></span>Kind to your rate limit</h3>
+          <p>One request at a time and conditional requests, as GitHub recommends. Refreshes fast while jobs run, slows down when quiet, pauses when you lock the screen.</p>
+        </article>
+        <article>
+          <h3><span class="badge info" aria-hidden="true"></span>Honest when things break</h3>
+          <p>Offline, rate limited, or GitHub having a bad day: RunnerTray says so, shows the last good data with its time, and recovers by itself.</p>
+        </article>
+        <article>
+          <h3><span class="badge ok" aria-hidden="true"></span>Updates itself</h3>
+          <p>Installs per user without administrator rights and updates from GitHub Releases. A portable zip is available too.</p>
+        </article>
+      </div>
+      <figure class="states">
+        <img src="tray-states.png" width="850" height="104" loading="lazy"
+             alt="Tray icon states: check for all passing, play for jobs running, cross for a failed run, exclamation mark when GitHub is unreachable, dots while loading.">
+        <figcaption>Every state has its own shape, not only a colour.</figcaption>
+      </figure>
+    </section>
+
+    <section id="sign-in" class="signin" aria-labelledby="signin-title">
+      <div>
+        <h2 id="signin-title">Sign in with GitHub in under a minute</h2>
+        <ol class="steps">
+          <li><b>Click Sign in with GitHub</b> in the RunnerTray panel.</li>
+          <li><b>Copy the code</b> and paste it on github.com.</li>
+          <li><b>Select Authorize.</b> Done. No terminal, no token to create.</li>
+        </ol>
+        <p>RunnerTray uses the <a href="https://github.com/apps/runnertray">RunnerTray GitHub App</a> with read-only permissions. Your sign-in is kept in Windows Credential Manager and renewed automatically.</p>
+        <table>
+          <caption>Permissions RunnerTray asks for</caption>
+          <thead><tr><th scope="col">Permission</th><th scope="col">Access</th><th scope="col">Used for</th></tr></thead>
+          <tbody>
+            <tr><td>Actions</td><td>Read</td><td>Workflow runs</td></tr>
+            <tr><td>Metadata</td><td>Read</td><td>Repository names</td></tr>
+            <tr><td>Self-hosted runners</td><td>Read</td><td>Runner status</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <img src="sign-in.png" width="489" height="426" loading="lazy"
+           alt="Sign in with GitHub window showing a one-time code and a Copy code and open GitHub button.">
+    </section>
+
+    <section id="accessibility" class="a11y" aria-labelledby="a11y-title">
+      <h2 id="a11y-title">Built to WCAG 2.2 AA</h2>
+      <ul>
+        <li><b>Not colour alone.</b> Every status has a shape and words.</li>
+        <li><b>Contrast.</b> Body text 16:1, secondary text over 4.5:1.</li>
+        <li><b>Keyboard.</b> Tab, arrows, Enter, F5, Esc. Visible focus ring.</li>
+        <li><b>Screen readers.</b> Every row reads out its status, repository, workflow, branch and time.</li>
+        <li><b>Your settings.</b> Follows Windows text size up to 225% and high contrast themes.</li>
+        <li><b>Tested.</b> Axe.Windows and UI Automation tests run on every build.</li>
+      </ul>
+    </section>
+
+    <section id="faq" class="faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">Questions</h2>
+      <details>
+        <summary>Is RunnerTray free?</summary>
+        <p>Yes. It is free and open source under the MIT license.</p>
+      </details>
+      <details>
+        <summary>What access does it need to my GitHub account?</summary>
+        <p>Read-only: Actions, Metadata, and organization Self-hosted runners. It cannot change code, settings, or runs. You can revoke it at any time in GitHub settings.</p>
+      </details>
+      <details>
+        <summary>Does it work with self-hosted runners?</summary>
+        <p>Yes. It shows each organization runner as online, busy, or offline. For runners in Docker on your PC it also shows which repository and job each one runs.</p>
+      </details>
+      <details>
+        <summary>Will it use up my API rate limit?</summary>
+        <p>No. Requests that find nothing new are answered with "304 Not Modified", which does not count against the limit. RunnerTray also pauses while your screen is locked.</p>
+      </details>
+      <details>
+        <summary>Windows says "Windows protected your PC". Is it safe?</summary>
+        <p>RunnerTray is not code-signed yet. Select More info, then Run anyway. Every release is built from the public source code by GitHub Actions.</p>
+      </details>
+      <details>
+        <summary>Does it send telemetry?</summary>
+        <p>No. It talks only to GitHub, and to Docker on your PC if you turn that on.</p>
+      </details>
+    </section>
+
+    <section class="final" aria-labelledby="final-title">
+      <h2 id="final-title">Stop refreshing the Actions tab.</h2>
+      <a class="btn primary" href="https://github.com/azharudh33n/runner-tray/releases/latest/download/RunnerTray-win-Setup.exe">Download RunnerTray for Windows</a>
+    </section>
+  </main>
+
+  <footer>
+    <p>RunnerTray is free and open source (<a href="https://github.com/azharudh33n/runner-tray/blob/main/LICENSE">MIT</a>). Not affiliated with GitHub, Inc.</p>
+    <p><a href="https://github.com/azharudh33n/runner-tray">Source</a> · <a href="https://github.com/azharudh33n/runner-tray/releases">Releases</a> · <a href="https://github.com/azharudh33n/runner-tray/issues">Report an issue</a></p>
+  </footer>
+</body>
+</html>
