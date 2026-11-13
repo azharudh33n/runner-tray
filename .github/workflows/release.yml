@@ -1,0 +1,35 @@
+# Push a tag like v0.1.0 to build both zips and publish a GitHub release.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Publish (self-contained, one exe)
+        run: dotnet publish src/RunnerTray -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o out/full
+
+      - name: Publish (needs .NET 8 Desktop Runtime)
+        run: dotnet publish src/RunnerTray -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o out/small
+
+      - name: Zip
+        shell: pwsh
+        run: |
+          Compress-Archive out/full/RunnerTray.exe, README.md, LICENSE RunnerTray-win-x64.zip
+          Compress-Archive out/small/RunnerTray.exe, README.md, LICENSE RunnerTray-win-x64-small.zip
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create ${{ github.ref_name }} RunnerTray-win-x64.zip RunnerTray-win-x64-small.zip --generate-notes --title "RunnerTray ${{ github.ref_name }}"
