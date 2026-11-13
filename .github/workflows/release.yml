@@ -5,6 +5,8 @@ name: Release
 on:
   push:
     tags: ["v*"]
+    # Dry run: a push to release/1.2.3 builds version 1.2.3 and uploads it as an artifact, publishes nothing.
+    branches: ["release/**"]
   # Dry run from the Actions tab: builds everything and uploads it as an artifact, publishes nothing.
   workflow_dispatch:
     inputs:
@@ -30,7 +32,7 @@ jobs:
       - name: Version from tag
         shell: pwsh
         run: |
-          $v = '${{ inputs.version || github.ref_name }}'.TrimStart('v')
+          $v = '${{ inputs.version || github.ref_name }}'.Split('/')[-1].TrimStart('v')
           if ($v -notmatch '^\d+\.\d+\.\d+$') { throw "Tag must look like v1.2.3" }
           "VERSION=$v" >> $env:GITHUB_ENV
 
@@ -55,7 +57,7 @@ jobs:
         run: |
           dotnet tool install -g vpk --version 1.2.161
           # Previous release, so vpk can build a small delta update. Not available for the first release.
-          if ('${{ github.event_name }}' -eq 'workflow_dispatch') { New-Item -ItemType Directory -Force releases | Out-Null } else {
+          if (-not '${{ github.ref }}'.StartsWith('refs/tags/')) { New-Item -ItemType Directory -Force releases | Out-Null } else {
           vpk download github --repoUrl https://github.com/${{ github.repository }} --token ${{ github.token }} -o releases
           if ($LASTEXITCODE -ne 0) { Write-Host "No earlier Velopack release; building a full package only." ; $global:LASTEXITCODE = 0 } }
           $notes = "release-notes.md"
@@ -74,7 +76,7 @@ jobs:
           Compress-Archive out/portable/RunnerTray.exe, README.md, LICENSE RunnerTray-$env:VERSION-win-x64-portable.zip
 
       - name: Upload dry-run output
-        if: github.event_name == 'workflow_dispatch'
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
         uses: actions/upload-artifact@v4
         with:
           name: runnertray-${{ env.VERSION }}
