@@ -40,8 +40,13 @@ public static partial class Log
         if (level != "INFO")
         {
             RecentProblems.Enqueue(line);
-            while (RecentProblems.Count > 50 && RecentProblems.TryDequeue(out _))
+            // Keep only the newest 50 entries.
+            while (RecentProblems.Count > 50)
             {
+                if (!RecentProblems.TryDequeue(out _))
+                {
+                    break;
+                }
             }
         }
 

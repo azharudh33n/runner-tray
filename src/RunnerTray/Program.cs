@@ -17,7 +17,7 @@ internal static class Program
     {
         // Velopack handles install, update and uninstall hooks first, then returns.
         VelopackApp.Build()
-            .OnBeforeUninstallFastCallback(_ => Uninstall.CleanUp())
+            .OnBeforeUninstallFastCallback(_ => Uninstall.CleanUp(keepSettings: true))
             .Run();
 
         Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
@@ -115,34 +115,6 @@ internal static class SingleInstance
         {
             registration.Unregister(null);
             signal.Dispose();
-        }
-    }
-}
-
-/// <summary>Removes what RunnerTray created outside its install folder. Settings are kept for a reinstall.</summary>
-internal static class Uninstall
-{
-    public static void CleanUp()
-    {
-        try
-        {
-            using var run = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", writable: true);
-            run?.DeleteValue("RunnerTray", throwOnMissingValue: false);
-        }
-        catch (Exception ex) when (ex is UnauthorizedAccessException or System.Security.SecurityException or IOException)
-        {
-            // Uninstall continues; nothing else to do.
-        }
-
-        new CredentialManagerStore().Delete("github");
-
-        try
-        {
-            if (Directory.Exists(DataFolder.Path)) Directory.Delete(DataFolder.Path, recursive: true);
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            // Files in use; harmless leftovers.
         }
     }
 }

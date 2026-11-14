@@ -96,6 +96,7 @@ public sealed class UiTests : IDisposable
     [InlineData("settings", "Settings - RunnerTray")]
     [InlineData("signin", "Sign in with GitHub")]
     [InlineData("diagnostics", "Diagnostics - RunnerTray")]
+    [InlineData("uninstall", "Uninstall RunnerTray")]
     public void Window_has_no_accessibility_errors(string window, string title)
     {
         Start(window, title);

@@ -26,6 +26,7 @@ internal static class SelfTest
 
             using (var settings = new SettingsForm(new AppConfig(), "Self-test", false, false)) Render(settings);
             using (var diagnostics = new DiagnosticsForm(() => "self-test")) Render(diagnostics);
+            using (var uninstall = new UninstallForm(installed: true)) Render(uninstall);
             using (var signIn = new SignInForm(_ => Task.FromException<DeviceCode>(new OperationCanceledException()), (_, _) => Task.FromException<TokenSet>(new OperationCanceledException())))
             {
                 signIn.CreateControl();

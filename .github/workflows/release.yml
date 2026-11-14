@@ -16,6 +16,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   release:
@@ -67,6 +69,30 @@ jobs:
             --packTitle RunnerTray --packAuthors "RunnerTray contributors" --icon assets/app.ico --splashImage assets/splash.png `
             --releaseNotes $notes -o releases
 
+      - name: Install, update and uninstall test (real installer)
+        shell: pwsh
+        run: |
+          # An older package of the same build, to test updating from it.
+          vpk pack --packId RunnerTray --packVersion 0.0.1 --packDir out/app --mainExe RunnerTray.exe `
+            --packTitle RunnerTray --packAuthors "RunnerTray contributors" --icon assets/app.ico -o releases-old
+          ./tools/test-install.ps1 -OldReleases releases-old -NewReleases releases -NewVersion $env:VERSION
+
+      - name: Checksums
+        shell: pwsh
+        run: |
+          Get-ChildItem releases -File | Where-Object { $_.Name -match '\.(exe|zip|nupkg)$' } | ForEach-Object {
+            "$((Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower())  $($_.Name)"
+          } | Set-Content releases/SHA256SUMS.txt
+          Get-Content releases/SHA256SUMS.txt
+
+      - name: Build provenance attestation
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: |
+            releases/*.exe
+            releases/*.zip
+            releases/*.nupkg
       - name: Upload dry-run output
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
         uses: actions/upload-artifact@v4
@@ -84,4 +110,5 @@ jobs:
         run: |
           vpk upload github --repoUrl https://github.com/${{ github.repository }} --token $env:GH_TOKEN `
             -o releases --publish --releaseName "RunnerTray $env:VERSION" --tag ${{ github.ref_name }}
+          gh release upload ${{ github.ref_name }} releases/SHA256SUMS.txt --clobber
           gh release edit ${{ github.ref_name }} --notes-file release-notes.md

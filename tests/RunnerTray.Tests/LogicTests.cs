@@ -69,9 +69,10 @@ public class LocalDockerTests
     {
         var job = LocalDockerReader.ParseRunningJob("√ Connected to GitHub\n2026-11-13 16:05:31Z: Listening for Jobs\n2026-11-13 16:06:02Z: Running job: Build and test\r\n");
 
-        Assert.NotNull(job);
-        Assert.Equal("Build and test", job.Value.Job);
-        Assert.Equal(new DateTimeOffset(2026, 11, 13, 16, 6, 2, TimeSpan.Zero), job.Value.Started);
+        Assert.True(job.HasValue);
+        var (name, started) = job.GetValueOrDefault();
+        Assert.Equal("Build and test", name);
+        Assert.Equal(new DateTimeOffset(2026, 11, 13, 16, 6, 2, TimeSpan.Zero), started);
     }
 
     [Fact]

@@ -10,8 +10,6 @@ namespace RunnerTray;
 /// </summary>
 internal sealed class TrayApp : ApplicationContext
 {
-    private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
-
     private readonly StartOptions _options;
     private readonly SynchronizationContext _ui;
     private readonly Services? _services;
@@ -71,6 +69,7 @@ internal sealed class TrayApp : ApplicationContext
             }
 
             _configWatcher = WatchConfig();
+            Uninstall.RepairStartup();
         }
 
         _icon = new NotifyIcon
@@ -112,6 +111,7 @@ internal sealed class TrayApp : ApplicationContext
             case "settings": Post(OpenSettings); break;
             case "signin": Post(() => SignIn(demo: true)); break;
             case "diagnostics": Post(OpenDiagnostics); break;
+            case "uninstall": Post(() => { using var f = new UninstallForm(installed: true); f.ShowDialog(); }); break;
             case not null: Post(OpenPopup); break;
         }
     }
@@ -659,30 +659,24 @@ internal sealed class TrayApp : ApplicationContext
         _updateItem.Click += async (_, _) => await _updater.ApplyAndRestartAsync();
         menu.Items.Add(_updateItem);
         menu.Items.Add(new ToolStripSeparator());
+        menu.Items.Add(Uninstall.Installed ? "&Uninstall RunnerTray…" : "Re&move RunnerTray…", null, (_, _) =>
+        {
+            _popup.Hide();
+            if (_options.Demo)
+            {
+                MessageBox.Show("Uninstalling is not available in demo mode.", "RunnerTray", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            Uninstall.Run();
+        });
         menu.Items.Add("E&xit", null, (_, _) => ExitThread());
         return menu;
     }
 
-    private static bool IsStartupEnabled()
-    {
-        using var key = Registry.CurrentUser.OpenSubKey(RunKey);
-        return key?.GetValue("RunnerTray") is string;
-    }
+    private static bool IsStartupEnabled() => Uninstall.StartupEnabled();
 
-    private static void SetStartup(bool enabled)
-    {
-        try
-        {
-            using var key = Registry.CurrentUser.OpenSubKey(RunKey, writable: true);
-            if (key is null) return;
-            if (enabled) key.SetValue("RunnerTray", $"\"{Environment.ProcessPath}\"");
-            else key.DeleteValue("RunnerTray", throwOnMissingValue: false);
-        }
-        catch (Exception ex) when (ex is UnauthorizedAccessException or System.Security.SecurityException or IOException)
-        {
-            Log.Warn($"Could not change Start with Windows: {ex.Message}");
-        }
-    }
+    private static void SetStartup(bool enabled) => Uninstall.SetStartup(enabled);
 
     protected override void ExitThreadCore()
     {
