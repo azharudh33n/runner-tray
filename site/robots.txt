@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://azharudh33n.github.io/runner-tray/sitemap.xml
+Sitemap: https://wx8.org/sitemap.xml
