@@ -286,7 +286,25 @@ public sealed class GitHubSource : IDataSource
         ToState(Str(r, "status"), Str(r, "conclusion")),
         r.GetProperty("created_at").GetDateTimeOffset(),
         r.GetProperty("updated_at").GetDateTimeOffset(),
-        Str(r, "html_url"));
+        Str(r, "html_url"))
+    {
+        Message = RunLogic.Headline(RunMessage(r)),
+    };
+
+    /// <summary>
+    /// display_title is the pull request title for pull request runs and the commit headline for pushes.
+    /// Older responses may lack it; then the head commit message is used.
+    /// </summary>
+    private static string RunMessage(JsonElement r)
+    {
+        var title = Str(r, "display_title");
+        if (title.Length > 0)
+        {
+            return title;
+        }
+
+        return r.TryGetProperty("head_commit", out var commit) && commit.ValueKind == JsonValueKind.Object ? Str(commit, "message") : "";
+    }
 
     private static string Str(JsonElement e, string name) =>
         e.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString()! : "";

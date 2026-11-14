@@ -27,6 +27,7 @@ internal sealed class TrayApp : ApplicationContext
     private readonly ToolStripMenuItem _signInItem = new();
     private readonly ToolStripMenuItem _updateItem = new() { Visible = false };
     private readonly ToolStripMenuItem _startupItem = new("Start with &Windows") { CheckOnClick = true };
+    private readonly HotkeyWindow _hotkey = new();
 
     private AppConfig _config;
     private Snapshot? _last;
@@ -41,13 +42,14 @@ internal sealed class TrayApp : ApplicationContext
     private string? _balloonUrl;
     private DateTime _lastProblemBalloon = DateTime.MinValue;
     private DateTime _ignoreConfigUntil = DateTime.MinValue;
+    private string? _hotkeyProblemShown;
 
     public TrayApp(StartOptions options)
     {
         _options = options;
         _config = options.Demo ? new AppConfig() : AppConfig.Load();
 
-        _popup = new PopupForm { AutoHide = options.TestUi is null, ConfigError = _config.LoadError };
+        _popup = new PopupForm { AutoHide = options.TestUi is null, ConfigError = _config.LoadError, HidePassingRuns = _config.HidePassingRuns };
         _popup.RefreshRequested += (_, _) => RefreshNow();
         _popup.BannerActionRequested += (_, a) => OnBannerAction(a);
         _ui = SynchronizationContext.Current ?? new WindowsFormsSynchronizationContext();
@@ -87,6 +89,8 @@ internal sealed class TrayApp : ApplicationContext
         {
             if (_balloonUrl is not null) Proc.Open(_balloonUrl);
         };
+        _hotkey.Pressed += (_, _) => TogglePopup(fromKeyboard: true);
+        ApplyHotkey();
 
         _pollTimer.Tick += (_, _) => RefreshNow();
         _localTimer.Tick += async (_, _) => await RefreshLocalAsync();
@@ -118,7 +122,7 @@ internal sealed class TrayApp : ApplicationContext
 
     // ---------- panel ----------
 
-    private void TogglePopup()
+    private void TogglePopup(bool fromKeyboard = false)
     {
         if (_popup.Visible)
         {
@@ -132,12 +136,14 @@ internal sealed class TrayApp : ApplicationContext
             return;
         }
 
-        OpenPopup();
+        OpenPopup(fromKeyboard);
     }
 
-    private void OpenPopup()
+    private void OpenPopup() => OpenPopup(fromKeyboard: false);
+
+    private void OpenPopup(bool fromKeyboard)
     {
-        _popup.PlaceNearTray();
+        _popup.PlaceNearTray(fromKeyboard);
         _popup.Show();
         _popup.Activate();
         _popup.FocusFirst();
@@ -499,6 +505,8 @@ internal sealed class TrayApp : ApplicationContext
         if (_options.Demo)
         {
             _config = updated;
+            _popup.HidePassingRuns = updated.HidePassingRuns;
+            ApplyHotkey();
             return;
         }
 
@@ -520,12 +528,49 @@ internal sealed class TrayApp : ApplicationContext
     {
         _config = config;
         _popup.ConfigError = config.LoadError;
+        _popup.HidePassingRuns = config.HidePassingRuns;
+        ApplyHotkey();
         _services?.Source.UpdateConfig(config);
         _services?.Api.ClearCache();
         _seen.Clear();
         _firstLoad = true;
         RefreshNow();
         _ = RefreshLocalAsync();
+    }
+
+    /// <summary>Registers the shortcut from the settings. When Windows refuses it, says so once for that shortcut.</summary>
+    private void ApplyHotkey()
+    {
+        var text = _config.Hotkey;
+        string problem;
+        if (string.IsNullOrEmpty(text))
+        {
+            _hotkey.Unregister();
+            _hotkeyProblemShown = null;
+            return;
+        }
+
+        if (!GlobalHotkey.TryParse(text, out var hotkey))
+        {
+            _hotkey.Unregister();
+            problem = $"RunnerTray does not understand the shortcut \"{text}\". Choose another one in Settings.";
+        }
+        else if (!_hotkey.Register(hotkey))
+        {
+            problem = $"{hotkey} is already used by another app. Choose another shortcut in Settings.";
+        }
+        else
+        {
+            _hotkeyProblemShown = null;
+            return;
+        }
+
+        Log.Warn(problem);
+        if (_hotkeyProblemShown != text)
+        {
+            _hotkeyProblemShown = text;
+            Balloon("Shortcut not available", problem, ToolTipIcon.Warning, null);
+        }
     }
 
     /// <summary>Reload settings when config.json is edited by hand.</summary>
@@ -687,6 +732,7 @@ internal sealed class TrayApp : ApplicationContext
         NetworkChange.NetworkAvailabilityChanged -= OnNetworkChanged;
         Problems.Raised -= OnProblem;
         _showSignal.Dispose();
+        _hotkey.Dispose();
         _configWatcher?.Dispose();
         _configDebounce.Dispose();
         _pollTimer.Dispose();

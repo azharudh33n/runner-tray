@@ -6,11 +6,14 @@ namespace RunnerTray;
 /// </summary>
 internal sealed class SettingsForm : Form
 {
+    private const string HotkeyOff = "Off";
+
     private readonly AppConfig _config;
     private readonly TextBox _owner = new();
     private readonly TextBox _repos = new();
     private readonly NumericUpDown _lookback = new() { Minimum = 1, Maximum = 90 };
     private readonly NumericUpDown _runCount = new() { Minimum = 5, Maximum = 50 };
+    private readonly CheckBox _hidePassing = new() { Text = "&Hide passing runs", AutoSize = true };
     private readonly NumericUpDown _refresh = new() { Minimum = 30, Maximum = 900, Increment = 30 };
     private readonly CheckBox _runners = new() { Text = "Show the organization's &self-hosted runners", AutoSize = true };
     private readonly TextBox _runnerFilter = new();
@@ -18,6 +21,7 @@ internal sealed class SettingsForm : Form
     private readonly TextBox _dockerDir = new();
     private readonly CheckBox _notifyFail = new() { Text = "Notify when a run &fails", AutoSize = true };
     private readonly CheckBox _notifyPass = new() { Text = "Notify when a run &passes", AutoSize = true };
+    private readonly ComboBox _hotkey = new() { DropDownStyle = ComboBoxStyle.DropDownList };
     private readonly CheckBox _startup = new() { Text = "Start with &Windows", AutoSize = true };
     private readonly CheckBox _autoUpdate = new() { Text = "Install &updates automatically", AutoSize = true };
 
@@ -80,6 +84,7 @@ internal sealed class SettingsForm : Form
         Row("&Repositories:", _repos, "Comma-separated names. Empty: all with recent pushes.");
         Row("&Look back (days):", _lookback);
         Row("Runs &shown:", _runCount);
+        Check(_hidePassing);
         Row("Refresh when &idle (seconds):", _refresh, "Running jobs always refresh every 15 seconds.");
 
         Heading("Runners");
@@ -88,9 +93,10 @@ internal sealed class SettingsForm : Form
         Row("&Docker label on this PC:", _dockerLabel, "For example ci-job=build-box. Empty: off.");
         Row("Runner work &folder:", _dockerDir);
 
-        Heading("Notifications and start");
+        Heading("Notifications, shortcut and start");
         Check(_notifyFail);
         Check(_notifyPass);
+        Row("Shortcut &key:", _hotkey, "Opens or closes the panel from anywhere.");
         Check(_startup);
         Check(_autoUpdate);
         _autoUpdate.Enabled = updatesAvailable;
@@ -116,6 +122,11 @@ internal sealed class SettingsForm : Form
         _repos.Text = string.Join(", ", _config.Repos);
         _lookback.Value = _config.LookbackDays;
         _runCount.Value = _config.RunCount;
+        _hidePassing.Checked = _config.HidePassingRuns;
+        _hotkey.Items.AddRange(new object[] { HotkeyOff, GlobalHotkey.Default, "Ctrl+Alt+R", "Ctrl+Alt+Shift+R" });
+        var hotkey = string.IsNullOrEmpty(_config.Hotkey) ? HotkeyOff : _config.Hotkey;
+        if (!_hotkey.Items.Contains(hotkey)) _hotkey.Items.Add(hotkey); // a shortcut written in the settings file
+        _hotkey.SelectedItem = hotkey;
         _refresh.Value = _config.RefreshSeconds;
         _runners.Checked = _config.ShowSelfHostedRunners;
         _runnerFilter.Text = _config.RunnerNameFilter;
@@ -138,6 +149,8 @@ internal sealed class SettingsForm : Form
             _config.Repos = _repos.Text.Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
             _config.LookbackDays = (int)_lookback.Value;
             _config.RunCount = (int)_runCount.Value;
+            _config.HidePassingRuns = _hidePassing.Checked;
+            _config.Hotkey = _hotkey.SelectedItem is string picked && picked != HotkeyOff ? picked : "";
             _config.RefreshSeconds = (int)_refresh.Value;
             _config.ShowSelfHostedRunners = _runners.Checked;
             _config.RunnerNameFilter = _runnerFilter.Text;

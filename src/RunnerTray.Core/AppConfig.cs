@@ -16,6 +16,12 @@ public sealed class AppConfig
 
     public int RunCount { get; set; } = 15;
 
+    /// <summary>Leave passing runs out of the Recent runs list. The summary line still counts them.</summary>
+    public bool HidePassingRuns { get; set; }
+
+    /// <summary>Global shortcut that opens or closes the panel, for example "Win+Shift+R". Empty: off.</summary>
+    public string Hotkey { get; set; } = GlobalHotkey.Default;
+
     /// <summary>Refresh interval while nothing is running. Runs in progress refresh every 15 seconds.</summary>
     public int RefreshSeconds { get; set; } = 60;
 
@@ -118,6 +124,11 @@ public sealed class AppConfig
         RunnerNameFilter = (RunnerNameFilter ?? "").Trim();
         DockerJobLabel = (DockerJobLabel ?? "").Trim();
         DockerWorkDir = string.IsNullOrWhiteSpace(DockerWorkDir) ? "/actions-runner/_work" : DockerWorkDir.Trim();
+
+        // A shortcut that cannot be read is kept as written, so the app can say which text is wrong.
+        Hotkey = string.IsNullOrWhiteSpace(Hotkey) ? ""
+            : GlobalHotkey.TryParse(Hotkey, out var hotkey) ? hotkey.ToString()
+            : Hotkey.Trim();
     }
 
     public AppConfig Clone() => JsonSerializer.Deserialize<AppConfig>(JsonSerializer.Serialize(this, Options), Options)!;
