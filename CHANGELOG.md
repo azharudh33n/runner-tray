@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- **Hide passing runs** setting: the Recent runs list shows only failed, running, queued and cancelled runs. The summary still counts every run. (#11)
+- **Hide passing runs** setting: the Recent runs list leaves out runs that passed and keeps every other run, including ones waiting for approval. The summary still counts every run. (#11)
 - **Shortcut key** to open or close the panel from anywhere, Win+Shift+R by default. Change it or turn it off in Settings. If another app already uses it, RunnerTray says so once and keeps running. (#12)
 - Each run's **commit message or pull request title** appears in its tooltip and is read by screen readers. No extra GitHub requests. (#13)
 
