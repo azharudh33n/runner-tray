@@ -4,11 +4,21 @@ publish/
 *.user
 .vs/
 _site/
-design/logo/renders/
-design/soak/
 
 # taste-skill working files (plans, check reports, screenshots)
 /.taste-skill/
 
 # Cloudflare wrangler local state
 .wrangler/
+
+# Design drafts and AI tool working files: keep them on your machine, never in the repo
+/design/
+/PRODUCT.md
+/DESIGN.md
+CLAUDE.md
+AGENTS.md
+.claude/
+.cursor/
+site/assets/ui/icons/
+site/assets/**/demo.html
+site/assets/**/_*-test.html
