@@ -28,6 +28,14 @@ and organization Self-hosted runners (read). GitHub's own
 [privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement)
 applies to your use of GitHub.
 
+## The website
+
+The website (https://runnertray.wx8.org/) is hosted on Cloudflare. It uses
+[Cloudflare Web Analytics](https://www.cloudflare.com/web-analytics/), which counts page views
+without cookies and without tracking you across sites. The site sets no cookies and loads no
+third-party fonts or scripts other than that counter. The download links redirect to GitHub
+Releases, where GitHub's privacy statement applies.
+
 ## Removing your data
 
 - **Uninstall RunnerTray** (tray menu or Settings > Apps): removes the sign-in, cache and logs.

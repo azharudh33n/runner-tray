@@ -1,5 +1,11 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Suggest a feature or idea
+    url: https://github.com/azharudh33n/runner-tray/discussions/new?category=ideas
+    about: Start in Discussions. Ideas that people support become feature issues on the roadmap.
+  - name: Ask a question
+    url: https://github.com/azharudh33n/runner-tray/discussions/categories/q-a
+    about: Questions about setup, sign-in or runners.
   - name: Security vulnerability
     url: https://github.com/azharudh33n/runner-tray/security/advisories/new
     about: Report security problems privately.

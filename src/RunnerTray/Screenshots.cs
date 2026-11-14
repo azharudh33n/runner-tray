@@ -39,10 +39,7 @@ internal static class Screenshots
         using var hero = Hero(panel);
         hero.Save(Path.Combine(folder, "hero.png"), ImageFormat.Png);
 
-        using (var social = Social(panel, Path.Combine(folder, "..", "assets", "logo-1024.png")))
-        {
-            social.Save(Path.Combine(folder, "social.png"), ImageFormat.Png);
-        }
+        // docs/social.png (the share card) is made by tools/render-og.ps1 from tools/og/og.html.
 
         using var states = States();
         states.Save(Path.Combine(folder, "tray-states.png"), ImageFormat.Png);
@@ -228,49 +225,6 @@ internal static class Screenshots
         form.DrawToBitmap(bmp, new Rectangle(Point.Empty, form.Size));
         bmp.Save(path, ImageFormat.Png);
         form.Close();
-    }
-
-    /// <summary>1280 x 640 image for link previews (GitHub, Google, social sites).</summary>
-    private static Bitmap Social(Bitmap panel, string logoPath)
-    {
-        const int w = 1280, h = 640;
-        var bmp = new Bitmap(w, h);
-        using var g = Graphics.FromImage(bmp);
-        g.SmoothingMode = SmoothingMode.AntiAlias;
-        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-        using (var bg = new LinearGradientBrush(new Rectangle(0, 0, w, h), Color.FromArgb(20, 30, 52), Color.FromArgb(10, 14, 26), 30f))
-        {
-            g.FillRectangle(bg, 0, 0, w, h);
-        }
-
-        Glow(g, new RectangleF(600, -300, 900, 800), Color.FromArgb(46, 242, 107, 58));
-        Glow(g, new RectangleF(-200, 300, 700, 600), Color.FromArgb(24, 88, 166, 255));
-
-        _ = logoPath; // the lockup below includes the symbol
-        using var mid = new Font("Segoe UI", 22f);
-        using var small = new Font("Segoe UI", 15f);
-        DrawLockup(g, 72, 196, 560);
-        TextRenderer.DrawText(g, "GitHub Actions status in your\nWindows system tray", mid,
-            new Rectangle(70, 338, 620, 130), Color.FromArgb(201, 209, 217), TextFormatFlags.WordBreak);
-        TextRenderer.DrawText(g, "Free · Open source · Windows 10 and 11", small, new Point(72, 470), Color.FromArgb(157, 167, 179));
-        TextRenderer.DrawText(g, "github.com/azharudh33n/runner-tray", small, new Point(72, 548), Color.FromArgb(255, 138, 92));
-
-        // Panel on the right, slightly cut off at the bottom, with a shadow.
-        var scale = 560f / panel.Height;
-        var pw = (int)(panel.Width * scale);
-        var rect = new RectangleF(w - pw - 80, 70, pw, 560);
-        Shadow(g, rect, 12);
-        using (var clip = Theme.Rounded(rect, 12))
-        {
-            g.SetClip(clip);
-            g.DrawImage(panel, rect);
-            g.ResetClip();
-            using var border = new Pen(Theme.Border);
-            g.DrawPath(border, clip);
-        }
-
-        return bmp;
     }
 
     /// <summary>The reversed horizontal lockup (symbol and wordmark), drawn from assets/lockup-horizontal-reversed.png.</summary>

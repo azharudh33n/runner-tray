@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>RunnerTray: GitHub Actions status in your Windows system tray</title>
-<meta name="description" content="Free, open-source Windows tray app for GitHub Actions. See running and failed workflow runs, self-hosted runner status, and get failure notifications. Sign in with GitHub in a minute.">
+<title>RunnerTray: see failed GitHub Actions runs from the Windows tray</title>
+<meta name="description" content="Free, open-source Windows tray app for GitHub Actions. Know when a workflow run fails or a self-hosted runner goes offline, without keeping a browser tab open.">
 <meta name="keywords" content="GitHub Actions, Windows tray app, system tray, CI status, workflow runs, self-hosted runners, build notifications, GitHub Actions monitor, desktop notifier, DevOps">
 <meta name="author" content="RunnerTray contributors">
 <meta name="theme-color" content="#0E1525">
@@ -16,26 +16,29 @@
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="RunnerTray">
-<meta property="og:title" content="RunnerTray: GitHub Actions status in your Windows tray">
-<meta property="og:description" content="See running and failed GitHub Actions runs and self-hosted runners from the Windows taskbar. Free and open source.">
+<meta property="og:title" content="RunnerTray: see failed GitHub Actions runs from the Windows tray">
+<meta property="og:description" content="Know when a workflow run fails or a self-hosted runner goes offline, without keeping a browser tab open. Free and open source for Windows 10 and 11.">
 <meta property="og:url" content="https://runnertray.wx8.org/">
-<meta property="og:image" content="https://runnertray.wx8.org/social.png">
-<meta property="og:image:width" content="1280">
-<meta property="og:image:height" content="640">
-<meta property="og:image:alt" content="RunnerTray panel showing GitHub Actions runs above the Windows taskbar">
+<meta property="og:image" content="https://runnertray.wx8.org/og.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="RunnerTray: stop checking a browser tab for GitHub Actions. The RunnerTray panel shows a failed run, runs in progress and self-hosted runners.">
+<meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="RunnerTray: GitHub Actions status in your Windows tray">
-<meta name="twitter:description" content="Running and failed workflow runs, self-hosted runners, and failure notifications in the Windows tray.">
-<meta name="twitter:image" content="https://runnertray.wx8.org/social.png">
+<meta name="twitter:title" content="RunnerTray: see failed GitHub Actions runs from the Windows tray">
+<meta name="twitter:description" content="Know when a workflow run fails or a self-hosted runner goes offline, without keeping a browser tab open.">
+<meta name="twitter:image" content="https://runnertray.wx8.org/og.png">
+<meta name="twitter:image:alt" content="RunnerTray: stop checking a browser tab for GitHub Actions. The RunnerTray panel shows a failed run, runs in progress and self-hosted runners.">
 
 <meta name="site-kind" content="software">
 <meta name="page-type" content="software">
 
 <!-- start.mjs brand --page software --bg "#0E1525" --ink "#F7F6F2" --accent "#F26B3A" --muted "#8A94A6" --type bricolage --radius sharp;
      the client's own faces replace the pairing's text and mono faces (docs/brand/README.md: Bricolage Grotesque, IBM Plex Sans, JetBrains Mono) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..700&family=IBM+Plex+Sans:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/BricolageGrotesque-w96.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/IBMPlexSans-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="assets/system.css">
 <link rel="stylesheet" href="assets/ui/cards.css">
 <link rel="stylesheet" href="assets/motion/motion.css">
@@ -60,9 +63,8 @@
 <link rel="stylesheet" href="assets/ui/base.css">
 <link rel="stylesheet" href="assets/ui/notify/fragment.css">
 
-<script>document.documentElement.classList.add('m-enter');setTimeout(()=>document.documentElement.classList.add('m-enter-done'),700)</script>
+<script src="head.js"></script>
 <script src="assets/backgrounds/backgrounds.js"></script>
-<script>document.documentElement.classList.add('mo-js');setTimeout(()=>document.documentElement.classList.add('mo-safe'),2500)</script>
 <link rel="modulepreload" href="assets/moments/moments.js">
 <link rel="modulepreload" href="assets/moments/lib.js">
 <link rel="modulepreload" href="assets/moments/letters-assemble/moment.js">
@@ -196,6 +198,14 @@
 
   }
   /* the sign-in frame: as tall as the words beside it at 1024 and up; on the tablet the height the screen leaves under the words; on a phone the whole second screen */
+  .hero__version { margin-top: var(--s-4); }
+  .pairs { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
+  .pairs > li { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: var(--s-2) var(--s-5); padding-block: var(--s-4); border-bottom: 1px solid var(--line); align-items: baseline; }
+  .pairs > li > .rows__name { font-weight: 500; }
+  .pairs > li > p { margin: 0; color: var(--muted); max-width: 52ch; }
+  .pairs > li > .link { justify-self: start; }
+  #features .panel--flush { background: var(--p-surface, #171e2e); }
+  @media (max-width: 639px) { .pairs > li { grid-template-columns: 1fr; } }
   #sign-in .frame--split { --ratio: 108%; }
   @media (min-width: 640px) and (max-width: 1023px) { #sign-in .frame--split { --ratio: 0px; height: calc(100svh - 625px); } }
   @media (max-width: 639px) { #sign-in .frame--split { --ratio: 0px; height: 100%; margin-top: 0; } }
@@ -208,12 +218,12 @@
   "description": "Windows system tray app that shows GitHub Actions workflow runs, self-hosted runner status, and failure notifications.",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Windows 10, Windows 11",
-  "softwareVersion": "1.0.0",
+  "softwareVersion": "0.9.9",
   "license": "https://opensource.org/licenses/MIT",
   "url": "https://runnertray.wx8.org/",
-  "downloadUrl": "https://github.com/azharudh33n/runner-tray/releases/latest/download/RunnerTray-win-Setup.exe",
-  "installUrl": "https://github.com/azharudh33n/runner-tray/releases/latest",
-  "image": "https://runnertray.wx8.org/social.png",
+  "downloadUrl": "https://runnertray.wx8.org/download",
+  "installUrl": "https://runnertray.wx8.org/download",
+  "image": "https://runnertray.wx8.org/og.png",
   "screenshot": "https://runnertray.wx8.org/popup.png",
   "codeRepository": "https://github.com/azharudh33n/runner-tray",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -271,7 +281,7 @@
               <a href="#docker-runners">This machine<span>Docker runners on this PC</span></a>
               <a href="#org-runners">Organization<span>Online, busy or offline</span></a>
             </div>
-            <a class="menu-card span-3 start-10" href="https://github.com/azharudh33n/runner-tray/releases/latest/download/RunnerTray-win-Portable.zip">
+            <a class="menu-card span-3 start-10" href="/download/portable">
               <div class="panel">
                 <div class="stage stage--fade-br"><div class="at-corner" style="--ax:24px;--ay:24px">
                   <div class="ui rt-gh" role="img" aria-label="The latest release on GitHub with the installer and the portable zip">
@@ -291,7 +301,7 @@
       <div class="nav__item"><a class="nav__link" href="#faq">Questions</a></div>
     </nav>
     <div class="nav__actions">
-      <a class="btn btn--primary" href="https://github.com/azharudh33n/runner-tray/releases/latest/download/RunnerTray-win-Setup.exe">Download for Windows</a>
+      <a class="btn btn--primary" href="/download">Download for Windows</a>
     </div>
     <button class="nav__toggle" type="button" aria-expanded="false" aria-label="Menu">
       <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -300,15 +310,16 @@
 </header>
 
 <main id="top">
-  <section class="hero hero--split" data-enter aria-labelledby="hero-h">
+  <section class="hero hero--split" data-enter="off" aria-labelledby="hero-h">
     <div class="wrap"><div class="hero-text grid hero__grid">
       <div class="hero__text span-5">
-        <h1 id="hero-h">Tray app for GitHub Actions on Windows</h1>
-        <p class="hero__lead">RunnerTray puts your running and failed workflow runs, self-hosted runners and Docker runners in the Windows tray. Free and open source, for Windows 10 and 11.</p>
+        <h1 id="hero-h">See failed GitHub Actions runs without opening a browser</h1>
+        <p class="hero__lead">RunnerTray puts your workflow runs, self-hosted runners and Docker runners in the Windows tray, and tells you when a run fails. Free and open source, for Windows 10 and 11.</p>
         <div class="btn-row">
-          <a class="btn btn--primary" href="https://github.com/azharudh33n/runner-tray/releases/latest/download/RunnerTray-win-Setup.exe">Download for Windows<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
+          <a class="btn btn--primary" href="/download">Download for Windows<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
           <a class="btn btn--secondary" href="https://github.com/azharudh33n/runner-tray">See the source on GitHub</a>
         </div>
+        <p class="t-small muted hero__version" data-latest>Latest release from GitHub. No admin rights needed.</p>
       </div>
       <!-- the app-frame: the RunnerTray panel as live HTML (docs/popup.png), its timers live; demo data -->
       <div class="hero__media span-6 start-7 app-frame" data-ui-pause-host data-enter-media>
@@ -347,17 +358,33 @@
     </div></div>
   </section>
 
+  <section class="section" id="problem" aria-labelledby="problem-h">
+    <div class="wrap">
+      <div class="grid">
+        <h2 class="span-5" id="problem-h">CI status should not depend on a browser tab</h2>
+        <div class="span-6 start-7 stack-4">
+          <ul class="pairs">
+            <li><span class="rows__name">Runs</span><p>A failed run sits in a GitHub tab until someone looks. The fix starts late.</p></li>
+            <li><span class="rows__name">Runners</span><p>A self-hosted runner goes offline and jobs queue. Nobody sees it until the queue is long.</p></li>
+            <li><span class="rows__name">Email</span><p>GitHub emails you about failed runs you started. Those emails end up in a filter.</p></li>
+          </ul>
+          <p>RunnerTray keeps this in one tray icon. The icon changes shape when a run fails, and a notification names the run. One click shows which runners are online, busy or offline.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="section g2" id="features" aria-labelledby="features-h">
     <div class="wrap">
       <div class="group">
         <div class="section-head">
-          <h2 id="features-h">What RunnerTray shows. <span class="muted">The tray icon first, the details one click away.</span></h2>
+          <h2 id="features-h">The tray icon first, the details one click away</h2>
         </div>
         <div class="grid">
           <article class="card card--row span-6 m-nolift" id="tray-icon">
             <h3>Shows the state in the tray icon</h3>
             <p>A check when runs pass, a play sign while jobs run, a cross when one fails.</p>
-            <div class="panel panel--flush" data-fx="fluted-glass" data-fx-seed="31" data-fx-params='{"drift":0}'>
+            <div class="panel panel--flush">
               <div class="stage stage--fade-b"><div class="at-rise fit" style="--fit-max:360px;--ax:32px;--ay:40px;--ay-sm:16px">
                 <div class="ui rt-tray" role="img" aria-label="The four tray icon states: a check for all passing, a play sign for jobs running, a cross for a failed run, an exclamation mark when GitHub cannot be reached; below, the Windows taskbar with the failed state in the tray">
                   <ul>
@@ -374,7 +401,7 @@
           <article class="card card--row span-6 m-nolift" id="notifications">
             <h3>Notifies you when a run fails</h3>
             <p>A Windows notification names the repository, workflow and branch. Click it to open the run.</p>
-            <div class="panel panel--flush" data-fx="fluted-glass" data-fx-seed="32" data-fx-params='{"drift":0}'>
+            <div class="panel panel--flush">
               <div class="stage stage--fade-b"><div class="at-rise fit" style="--fit-max:380px;--ax:32px;--ay:calc(100% - 180px);--ay-sm:16px" data-ui-loop>
                 <div class="ui ui-notify" data-ui="notify">
                   <ul class="ui-notify__list" data-notify-list>
@@ -392,7 +419,7 @@
         <article class="card card--row span-6 m-nolift" id="docker-runners">
           <h3>Reads the Docker runners on this PC</h3>
           <p>Each runner container shows the repository and job it runs, with a live timer.</p>
-          <div class="panel panel--flush" data-fx="fluted-glass" data-fx-seed="33" data-fx-params='{"drift":0}'>
+          <div class="panel panel--flush">
             <div class="stage stage--fade-b"><div class="at-rise fit" style="--fit-max:440px;--ax:32px;--ay:40px;--ay-sm:16px">
               <div class="ui rt-panel rt-panel--list" role="img" aria-label="This machine: four runner containers in Docker on this PC; build-box-1 runs storefront-web, Build and test, for 3 minutes 12; build-box-2 runs payments-api, Integration tests, for 1 minute 40; two idle">
                 <p class="rt-sec rt-sec--ic"><img loading="lazy" decoding="async" data-icon="docker" src="assets/icons/docker.svg" alt="" width="20" height="20">This machine<span>2 of 4 busy</span></p>
@@ -408,7 +435,7 @@
         <article class="card card--row span-6 m-nolift" id="org-runners">
           <h3>Lists your organization's runners</h3>
           <p>Every self-hosted runner shows online, busy or offline, with its labels.</p>
-          <div class="panel panel--flush" data-fx="fluted-glass" data-fx-seed="34" data-fx-params='{"drift":0}'>
+          <div class="panel panel--flush">
             <div class="stage stage--fade-b"><div class="at-rise fit" style="--fit-max:440px;--ax:32px;--ay:40px;--ay-sm:16px">
               <div class="ui rt-panel rt-panel--list" role="img" aria-label="Self-hosted runners of northwind-labs: build-box-1 and build-box-2 busy, build-box-3, build-box-4 and win-build-01 idle, mac-mini-02 offline">
                 <p class="rt-sec rt-sec--ic"><img loading="lazy" decoding="async" data-icon="github-actions" src="assets/icons/github-actions.svg" alt="" width="20" height="20">Self-hosted runners<span>2 busy · 5 online</span></p>
@@ -430,13 +457,13 @@
   <!-- letters-assemble: the measured figure builds itself as it rises through the screen -->
   <section class="section" id="usage" data-moment="letters-assemble" data-moment-opts='{"spread": 0.6}' aria-labelledby="usage-h">
     <div class="wrap">
-      <h2 class="mo-la__type" id="usage-h">0.08 % CPU</h2>
-      <p class="mo-la__sub">The average in a 60-minute test, with about 90 MB of memory in use.</p>
+      <h2 class="mo-la__type" id="usage-h">Quiet on your PC</h2>
+      <p class="mo-la__sub">In a 60-minute test RunnerTray averaged 0.08 % CPU and about 90 MB of memory.</p>
       <div class="grid usage__rows">
-        <ul class="rows span-8">
-          <li><span class="rows__name">Refresh</span><span class="rows__value">Every 15 s while runs are active, slower when nothing runs</span></li>
-          <li><span class="rows__name">Requests</span><span class="rows__value">One at a time; unchanged data costs no rate limit</span></li>
-          <li><span class="rows__name">Locked screen</span><span class="rows__value">Paused until the screen is in use again</span></li>
+        <ul class="pairs span-8">
+          <li><span class="rows__name">Refresh</span><p>Every 15 seconds while runs are active, slower when nothing runs.</p></li>
+          <li><span class="rows__name">Requests</span><p>One at a time. Unchanged data comes back as HTTP 304 and costs no rate limit.</p></li>
+          <li><span class="rows__name">Locked screen</span><p>Paused until you use the PC again.</p></li>
         </ul>
       </div>
     </div>
@@ -475,13 +502,30 @@
     </div>
   </section>
 
+  <section class="section" id="open" aria-labelledby="open-h">
+    <div class="wrap">
+      <div class="grid">
+        <div class="span-5 stack-4">
+          <h2 id="open-h">Built in the open</h2>
+          <p>RunnerTray is MIT-licensed and developed on GitHub. Ideas, bug reports and pull requests are welcome.</p>
+        </div>
+        <ul class="pairs span-6 start-7">
+          <li><a class="rows__name link" href="https://github.com/azharudh33n/runner-tray/discussions/new?category=ideas">Suggest a feature</a><p>Post it in Discussions. Ideas with support go on the roadmap.</p></li>
+          <li><a class="rows__name link" href="https://github.com/azharudh33n/runner-tray/issues/new?template=bug_report.yml">Report a bug</a><p>The form asks for your Windows version and the log file.</p></li>
+          <li><a class="rows__name link" href="https://github.com/azharudh33n/runner-tray/contribute">Contribute code</a><p>Start with an issue labelled good first issue. CONTRIBUTING.md explains the build and tests.</p></li>
+          <li><a class="rows__name link" href="https://github.com/azharudh33n/runner-tray/blob/main/docs/ROADMAP.md">Read the roadmap</a><p>What comes in 1.1 and 1.2, and why.</p></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
   <section class="section g2m" id="faq" aria-labelledby="faq-h">
     <div class="wrap">
       <div class="faq-top">
         <div class="section-head">
           <h2 id="faq-h">Questions about RunnerTray</h2>
           <p>Short answers to what people ask before they install.</p>
-          <p><a class="link" href="https://github.com/azharudh33n/runner-tray/issues">Ask on GitHub</a></p>
+          <p><a class="link" href="https://github.com/azharudh33n/runner-tray/discussions/categories/q-a">Ask in GitHub Discussions</a></p>
         </div>
         <div class="faq">
           <div class="faq__item"><h3>Is RunnerTray free?</h3><p>Yes. RunnerTray is free and open source under the MIT licence.</p></div>
@@ -555,9 +599,9 @@
         <div>
           <h2 id="close-h">RunnerTray for Windows 10 and 11</h2>
           <p class="t-lead">Free under the MIT licence. Installs without admin rights and updates itself from GitHub Releases.</p>
-          <p><a class="link" href="https://github.com/azharudh33n/runner-tray/releases/latest/download/RunnerTray-win-Portable.zip">Get the portable zip</a></p>
+          <p><a class="link" href="/download/portable">Get the portable zip</a></p>
         </div>
-        <a class="btn btn--primary" href="https://github.com/azharudh33n/runner-tray/releases/latest/download/RunnerTray-win-Setup.exe">Download for Windows<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
+        <a class="btn btn--primary" href="/download">Download for Windows<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
       </div>
       <p class="close__word" aria-hidden="true">RunnerTray</p>
     </div>
@@ -568,8 +612,8 @@
           <p class="footer__lede">GitHub Actions status in the Windows tray.</p>
         </div>
         <div class="span-2 footer__col"><h3>Product</h3><ul><li><a href="#features">Features</a></li><li><a href="#sign-in">Sign-in</a></li><li><a href="#accessibility">Accessibility</a></li><li><a href="#faq">Questions</a></li></ul></div>
-        <div class="span-2 footer__col"><h3>Download</h3><ul><li><a href="https://github.com/azharudh33n/runner-tray/releases">Releases</a></li><li><a href="https://github.com/azharudh33n/runner-tray">Source code</a></li></ul></div>
-        <div class="span-2 footer__col"><h3>Project</h3><ul><li><a href="https://github.com/azharudh33n/runner-tray/blob/main/LICENSE">MIT licence</a></li><li><a href="https://github.com/azharudh33n/runner-tray/blob/main/TRADEMARKS.md">Trademarks</a></li><li><a href="https://github.com/azharudh33n/runner-tray/blob/main/docs/brand/README.md">Brand guidelines</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Download</h3><ul><li><a href="/download">Installer</a></li><li><a href="/download/portable">Portable zip</a></li><li><a href="https://github.com/azharudh33n/runner-tray/releases">All releases</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Project</h3><ul><li><a href="https://github.com/azharudh33n/runner-tray">Source code</a></li><li><a href="https://github.com/azharudh33n/runner-tray/discussions">Discussions</a></li><li><a href="https://github.com/azharudh33n/runner-tray/blob/main/docs/ROADMAP.md">Roadmap</a></li><li><a href="https://github.com/azharudh33n/runner-tray/blob/main/CONTRIBUTING.md">Contributing</a></li><li><a href="https://github.com/azharudh33n/runner-tray/blob/main/LICENSE">MIT licence</a></li><li><a href="https://github.com/azharudh33n/runner-tray/blob/main/TRADEMARKS.md">Trademarks</a></li><li><a href="https://github.com/azharudh33n/runner-tray/blob/main/docs/brand/README.md">Brand guidelines</a></li></ul></div>
         <div class="span-2 footer__col"><h3>Help</h3><ul><li><a href="https://github.com/azharudh33n/runner-tray/issues">Report an issue</a></li><li><a href="https://github.com/azharudh33n/runner-tray/blob/main/SECURITY.md">Security</a></li><li><a href="https://github.com/azharudh33n/runner-tray/blob/main/PRIVACY.md">Privacy</a></li></ul></div>
       </div>
       <div class="footer__legal">
@@ -581,7 +625,7 @@
 </footer>
 
 <nav class="actionbar" aria-label="Quick actions">
-  <a class="btn btn--primary" href="https://github.com/azharudh33n/runner-tray/releases/latest/download/RunnerTray-win-Setup.exe">Download for Windows</a>
+  <a class="btn btn--primary" href="/download">Download for Windows</a>
 </nav>
 
 <script type="module" src="assets/system.js"></script>
@@ -589,5 +633,6 @@
 <script type="module" src="assets/layout/layout.js"></script>
 
 <script type="module" src="rt-panel.js"></script>
+<script type="module" src="download.js"></script>
 </body>
 </html>

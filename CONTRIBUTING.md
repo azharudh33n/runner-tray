@@ -7,9 +7,15 @@ Thank you for helping. Bug reports, ideas, documentation fixes and code are all 
 - **Bugs:** open an [issue](https://github.com/azharudh33n/runner-tray/issues/new/choose) with the
   bug template. Attach the report from **right-click the tray icon → Diagnostics → Copy**. It
   contains no tokens.
-- **Ideas:** check the [roadmap](docs/ROADMAP.md) first, then open a feature request.
+- **Ideas:** check the [roadmap](docs/ROADMAP.md) first, then post in
+  [Discussions → Ideas](https://github.com/azharudh33n/runner-tray/discussions/categories/ideas).
+  Ideas that people support become feature issues.
+- **Questions:** ask in [Discussions → Q&A](https://github.com/azharudh33n/runner-tray/discussions/categories/q-a).
 - **Security problems:** do not open an issue. See [SECURITY.md](SECURITY.md).
 - **Larger changes:** open an issue first so we can agree on the approach.
+- **First contribution:** pick an issue labelled
+  [good first issue](https://github.com/azharudh33n/runner-tray/labels/good%20first%20issue) and say
+  in a comment that you are working on it.
 
 ## Set up
 
@@ -53,6 +59,25 @@ If you change the UI, regenerate the screenshots:
 
 ```bash
 dotnet run --project src/RunnerTray -c Release -- --screenshot docs
+```
+
+## Website
+
+The website (https://runnertray.wx8.org/) is in `site/`. A Cloudflare Worker in `site-worker/`
+serves it and adds `/download`, which redirects to the newest installer on GitHub Releases.
+
+```bash
+pwsh tools/build-site.ps1
+```
+
+```bash
+npx wrangler dev --var DEV:1
+```
+
+If you change the share image template (`tools/og/og.html`), render it again:
+
+```bash
+pwsh tools/render-og.ps1
 ```
 
 ## Pull requests

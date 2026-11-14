@@ -1,0 +1,17 @@
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body {
+  margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 32px;
+  background: #0E1525; color: #F7F6F2;
+  font: 400 1.0625rem/1.6 "IBM Plex Sans", system-ui, sans-serif;
+}
+main { max-width: 34rem; }
+.logo { display: inline-block; margin-bottom: 48px; }
+.code { margin: 0; font: 400 0.875rem "JetBrains Mono", ui-monospace, monospace; color: #FF8A5C; }
+h1 { margin: 8px 0 12px; font: 400 clamp(2rem, 6vw, 3rem)/1.05 "Bricolage Grotesque", system-ui, sans-serif; letter-spacing: -0.03em; }
+p { margin: 0 0 12px; color: #C9CED8; }
+.actions { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; margin-top: 32px; }
+.btn { background: #F26B3A; color: #0E1525; padding: 12px 22px; font-weight: 500; text-decoration: none; }
+.btn:hover { background: #FF8A5C; }
+.link { color: #F7F6F2; text-underline-offset: 4px; }
+a:focus-visible { outline: 2px solid #FF8A5C; outline-offset: 3px; }

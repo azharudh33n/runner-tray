@@ -20,7 +20,8 @@ The MIT licence text: https://opensource.org/license/mit
 | IBM Plex Sans | Website text | SIL Open Font License 1.1 | https://github.com/IBM/plex |
 | JetBrains Mono | Website code and numbers | SIL Open Font License 1.1 | https://github.com/JetBrains/JetBrainsMono |
 
-The website loads its fonts from Google Fonts. The app itself uses Segoe UI, which is part of Windows.
+The website serves these fonts itself (latin subsets in `site/fonts/`); it makes no requests to
+Google or other font services. The app itself uses Segoe UI, which is part of Windows.
 
 ## Website only
 

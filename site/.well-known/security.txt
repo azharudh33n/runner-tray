@@ -1,0 +1,5 @@
+Contact: https://github.com/azharudh33n/runner-tray/security/advisories/new
+Expires: 2027-11-14T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://runnertray.wx8.org/.well-known/security.txt
+Policy: https://github.com/azharudh33n/runner-tray/blob/main/SECURITY.md

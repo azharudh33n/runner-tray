@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0
+## 0.9.9 (beta)
 
 First stable release.
 
