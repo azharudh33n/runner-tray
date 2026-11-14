@@ -12,7 +12,11 @@ public sealed record RunInfo(
     RunState State,
     DateTimeOffset Created,
     DateTimeOffset Updated,
-    string Url);
+    string Url)
+{
+    /// <summary>The pull request title or commit message headline GitHub shows for the run. Empty if unknown.</summary>
+    public string Message { get; init; } = "";
+}
 
 public sealed record RunnerInfo(string Name, bool Online, bool Busy, IReadOnlyList<string> Labels);
 
@@ -77,4 +81,27 @@ public static class RunLogic
 
     public static bool AnyActive(IEnumerable<RunInfo> runs) =>
         runs.Any(r => r.State is RunState.Running or RunState.Queued);
+
+    /// <summary>The runs for the Recent runs list: all of them, or all but the passing ones.</summary>
+    public static List<RunInfo> Visible(IEnumerable<RunInfo> runs, bool hidePassing) =>
+        runs.Where(r => !hidePassing || r.State != RunState.Success).ToList();
+
+    /// <summary>The first line of a commit message or title, shortened to at most <paramref name="max"/> characters.</summary>
+    public static string Headline(string? text, int max = 80)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return "";
+        }
+
+        var line = text.AsSpan();
+        var end = line.IndexOfAny('\r', '\n');
+        if (end >= 0)
+        {
+            line = line[..end];
+        }
+
+        line = line.Trim();
+        return line.Length <= max ? line.ToString() : string.Concat(line[..(max - 1)].TrimEnd(), "…");
+    }
 }

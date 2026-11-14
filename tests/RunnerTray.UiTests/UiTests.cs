@@ -91,6 +91,15 @@ public sealed class UiTests : IDisposable
         Assert.NotEqual(first.Name, second.Name);
     }
 
+    [Fact]
+    public void Settings_offers_hide_passing_runs_and_a_shortcut()
+    {
+        var settings = Start("settings", "Settings - RunnerTray");
+
+        Assert.NotNull(settings.FindFirstDescendant(cf => cf.ByName("Hide passing runs").And(cf.ByControlType(ControlType.CheckBox))));
+        Assert.NotNull(settings.FindFirstDescendant(cf => cf.ByName("Shortcut key").And(cf.ByControlType(ControlType.ComboBox))));
+    }
+
     [Theory]
     [InlineData("panel", "RunnerTray")]
     [InlineData("settings", "Settings - RunnerTray")]

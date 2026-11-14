@@ -42,7 +42,8 @@ The screenshots use made-up demo data (`RunnerTray.exe --demo`).
 
 - **Recent runs** across all your repositories (or a list you choose), with
   repository, workflow, branch, trigger, author, and age. Running jobs show a
-  live timer. Click a run to open it on GitHub.
+  live timer. Hover a run to see its commit message or pull request title. Click a run to open it
+  on GitHub. You can hide passing runs in **Settings**.
 - **Self-hosted runners** of an organization: online, busy, or offline, with
   their labels.
 - **This machine:** if your runners run in Docker containers on this PC,
@@ -83,6 +84,7 @@ Every build runs [Axe.Windows](https://github.com/microsoft/axe-windows) on the 
 
 | Key | Action |
 |---|---|
+| Win+Shift+R | Open or close the panel from anywhere (change or turn off in **Settings**) |
 | Win+B, then arrow keys | Move to the RunnerTray icon in the tray |
 | Shift+F10 or the Menu key | Open the menu, then select **Open** |
 | Tab, Shift+Tab, Up, Down | Move between runs |
@@ -177,12 +179,14 @@ Right-click the icon, then **Settings**. Changes apply at once. The settings are
 | Repositories | all | Names to watch. Empty: every repository with a push in the last *Look back* days (at most 40). |
 | Look back (days) | 2 | How far back to look for active repositories. |
 | Runs shown | 15 | Number of runs in the panel. |
+| Hide passing runs | off | Leave passing runs out of the list. The summary line still counts them. |
 | Refresh when idle | 60 s | While runs are active, RunnerTray refreshes every 15 s. After 30 quiet minutes, every 5 minutes. |
 | Self-hosted runners | on | Show the organization's runners (organization admins only). |
 | Runner name contains | all | Only show runners whose name contains this text. |
 | Docker label on this PC | off | Label of runner containers on this PC, for example `ci-job=build-box`. Turns on **This machine**. |
 | Runner work folder | `/actions-runner/_work` | Work folder inside those containers. |
 | Notifications | failures | Notify when a run fails, passes, or both. |
+| Shortcut key | Win+Shift+R | Opens or closes the panel from anywhere. If another app uses it, RunnerTray says so once; pick another or Off. |
 | Start with Windows | off | Start RunnerTray when you sign in to Windows. |
 | Install updates automatically | on | Installer and portable zip from a release. |
 

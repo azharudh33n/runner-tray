@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using Xunit;
 
 namespace RunnerTray.Tests;
@@ -45,6 +46,24 @@ public class GitHubSourceTests
         var clock = new FakeClock { Now = Now };
         var api = new ApiClient(tokens ?? new FakeTokens("t"), new ResponseCache(null), handler, clock.Delay, () => clock.Now);
         return new GitHubSource(config ?? new AppConfig { Owner = "acme" }, api, () => Now);
+    }
+
+    [Fact]
+    public void Run_message_is_the_display_title_or_the_commit_headline()
+    {
+        using var pullRequest = JsonDocument.Parse("""
+            {"id":7,"name":"CI","event":"pull_request","display_title":"Send refund events to webhooks",
+             "head_commit":{"message":"wip"},"created_at":"2026-11-13T12:00:00Z","updated_at":"2026-11-13T12:01:00Z"}
+            """);
+        using var push = JsonDocument.Parse("""
+            {"id":8,"name":"CI","event":"push","head_commit":{"message":"Fix login on Safari\n\nThe cookie was too large."},
+             "created_at":"2026-11-13T12:00:00Z","updated_at":"2026-11-13T12:01:00Z"}
+            """);
+        using var neither = JsonDocument.Parse("""{"id":9,"name":"CI","created_at":"2026-11-13T12:00:00Z","updated_at":"2026-11-13T12:01:00Z"}""");
+
+        Assert.Equal("Send refund events to webhooks", GitHubSource.ParseRun("api", pullRequest.RootElement).Message);
+        Assert.Equal("Fix login on Safari", GitHubSource.ParseRun("web", push.RootElement).Message);
+        Assert.Equal("", GitHubSource.ParseRun("web", neither.RootElement).Message);
     }
 
     [Fact]

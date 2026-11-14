@@ -17,6 +17,9 @@ internal sealed class RowControl : Control
     public string StateWords { get; init; } = "";
     public string Title { get; init; } = "";
     public string Subtitle { get; init; } = "";
+
+    /// <summary>Extra text for the tooltip and screen readers, for example the commit message. Empty: none.</summary>
+    public string Description { get; init; } = "";
     public Func<string> RightText { get; init; } = () => "";
     public Func<string>? RightWords { get; init; }
     public string? Url { get; init; }
@@ -46,6 +49,7 @@ internal sealed class RowControl : Control
         TabStop = Url is not null;
         Cursor = Url is null ? Cursors.Default : Cursors.Hand;
         AccessibleName = SpokenText;
+        AccessibleDescription = string.IsNullOrEmpty(Description) ? null : Description;
         AccessibleRole = Url is null ? AccessibleRole.StaticText : AccessibleRole.Link;
         AccessibleDefaultActionDescription = Url is null ? null : "Open on GitHub";
     }
@@ -162,6 +166,7 @@ internal sealed class RowControl : Control
         public RowAccessible(RowControl row) : base(row) => _row = row;
 
         public override string? Name => _row.SpokenText;
+        public override string? Description => string.IsNullOrEmpty(_row.Description) ? null : _row.Description;
         public override AccessibleRole Role => _row.Url is null ? AccessibleRole.StaticText : AccessibleRole.Link;
         public override string? DefaultAction => _row.Url is null ? null : "Open on GitHub";
         public override void DoDefaultAction() => _row.Activate();

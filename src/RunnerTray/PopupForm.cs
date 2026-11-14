@@ -13,10 +13,12 @@ internal sealed class PopupForm : Form
     private readonly Panel _viewport;
     private readonly FlowLayoutPanel _list;
     private readonly System.Windows.Forms.Timer _tick;
+    private readonly ToolTip _tips = new() { ShowAlways = true, AutoPopDelay = 15000 };
 
     private readonly List<RowControl> _noticeRows = new();
     private Snapshot? _snapshot;
     private IReadOnlyList<LocalJob> _local = Array.Empty<LocalJob>();
+    private bool _hidePassing;
 
     public event EventHandler? RefreshRequested;
 
@@ -27,6 +29,18 @@ internal sealed class PopupForm : Form
     public string? ConfigError { get; set; }
 
     public DateTime LastHidden { get; private set; }
+
+    /// <summary>Leave passing runs out of the Recent runs list. The summary line still counts them.</summary>
+    public bool HidePassingRuns
+    {
+        get => _hidePassing;
+        set
+        {
+            if (_hidePassing == value) return;
+            _hidePassing = value;
+            if (_snapshot is not null) Rebuild();
+        }
+    }
 
     /// <summary>Hide when the popup loses focus (off for screenshots).</summary>
     public bool AutoHide { get; set; } = true;
@@ -136,12 +150,27 @@ internal sealed class PopupForm : Form
         if (changed) Rebuild();
     }
 
-    /// <summary>Place the popup next to the tray, on the screen where the cursor is.</summary>
-    public void PlaceNearTray()
+    /// <summary>
+    /// Place the popup next to the tray, on the screen where the cursor is. Opened from the keyboard there is
+    /// no click position, so it goes in the corner of the main screen where the notification area is.
+    /// </summary>
+    public void PlaceNearTray(bool fromKeyboard = false)
     {
         var cursor = Cursor.Position;
         var wa = Screen.FromPoint(cursor).WorkingArea;
         var margin = LogicalToDeviceUnits(12);
+        if (fromKeyboard)
+        {
+            var screen = Screen.PrimaryScreen ?? Screen.FromPoint(cursor);
+            wa = screen.WorkingArea;
+            var left = wa.Left > screen.Bounds.Left;  // taskbar on the left
+            var top = wa.Top > screen.Bounds.Top;     // taskbar at the top
+            Location = new Point(
+                left ? wa.Left + margin : wa.Right - Width - margin,
+                top ? wa.Top + margin : Math.Max(wa.Top + margin, wa.Bottom - Height - margin));
+            return;
+        }
+
         var x = Math.Clamp(cursor.X - Width / 2, wa.Left + margin, wa.Right - Width - margin);
         int y;
         if (cursor.Y >= wa.Bottom) y = wa.Bottom - Height - margin;      // taskbar at the bottom
@@ -215,6 +244,7 @@ internal sealed class PopupForm : Form
         var s = _snapshot;
         var hadFocus = _list.ContainsFocus;
         _list.SuspendLayout();
+        _tips.RemoveAll();
         while (_list.Controls.Count > 0)
         {
             var c = _list.Controls[0];
@@ -293,13 +323,19 @@ internal sealed class PopupForm : Form
         if (s is not null)
         {
             // 2. Recent runs.
-            AddSection("RECENT RUNS");
+            var shown = RunLogic.Visible(s.Runs, _hidePassing);
+            var hidden = s.Runs.Count - shown.Count;
+            AddSection(hidden > 0 ? $"RECENT RUNS   {hidden} passing hidden" : "RECENT RUNS");
             if (s.Runs.Count == 0)
             {
                 AddRow(new RowControl { Compact = true, Title = "No runs yet", Subtitle = "in the watched repositories" });
             }
+            else if (shown.Count == 0)
+            {
+                AddRow(new RowControl { Compact = true, Title = "All recent runs passed", Subtitle = "passing runs are hidden" });
+            }
 
-            foreach (var r in s.Runs)
+            foreach (var r in shown)
             {
                 var run = r;
                 AddRow(new RowControl
@@ -310,6 +346,7 @@ internal sealed class PopupForm : Form
                     StateWords = Theme.Words(run.State),
                     Title = $"{run.Repo}  ·  {run.Workflow}",
                     Subtitle = $"{run.Branch}   ·   {EventName(run.Event)}   ·   {run.Actor}",
+                    Description = run.Message,
                     RightText = () => run.State == RunState.Running ? Theme.Elapsed(run.Created) : Theme.Age(run.Updated),
                     RightWords = () => run.State == RunState.Running ? Theme.ElapsedWords(run.Created) : Theme.Age(run.Updated),
                     Url = run.Url,
@@ -409,6 +446,20 @@ internal sealed class PopupForm : Form
     {
         row.Height = LogicalToDeviceUnits(Theme.Scaled(row.Compact ? 34 : 48));
         _list.Controls.Add(row);
+        if (!string.IsNullOrEmpty(row.Description))
+        {
+            _tips.SetToolTip(row, $"{row.Title}\n{row.Description}");
+        }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _tips.Dispose();
+        }
+
+        base.Dispose(disposing);
     }
 
     private void FitRows()

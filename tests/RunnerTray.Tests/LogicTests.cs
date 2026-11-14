@@ -62,6 +62,75 @@ public class RunLogicTests
     }
 }
 
+public class RecentRunsTests
+{
+    private static readonly DateTimeOffset T = new(2026, 11, 13, 12, 0, 0, TimeSpan.Zero);
+
+    private static RunInfo R(long id, RunState s) => new(id, "repo", "CI", "main", "push", "a", s, T, T, "u");
+
+    [Fact]
+    public void Hiding_passing_runs_keeps_every_other_run_in_order()
+    {
+        var runs = new[] { R(1, RunState.Success), R(2, RunState.Failure), R(3, RunState.Running), R(4, RunState.Success), R(5, RunState.Cancelled), R(6, RunState.Queued) };
+
+        Assert.Equal(new long[] { 2, 3, 5, 6 }, RunLogic.Visible(runs, hidePassing: true).Select(r => r.Id));
+        Assert.Equal(new long[] { 1, 2, 3, 4, 5, 6 }, RunLogic.Visible(runs, hidePassing: false).Select(r => r.Id));
+    }
+
+    [Theory]
+    [InlineData("Fix login\n\nLonger description", "Fix login")]
+    [InlineData("  Trim me  \r\nbody", "Trim me")]
+    [InlineData("One line", "One line")]
+    [InlineData("", "")]
+    [InlineData(null, "")]
+    public void Headline_is_the_first_line(string? text, string expected) => Assert.Equal(expected, RunLogic.Headline(text));
+
+    [Fact]
+    public void Long_headline_is_shortened_to_80_characters()
+    {
+        var headline = RunLogic.Headline(new string('a', 120));
+
+        Assert.Equal(80, headline.Length);
+        Assert.EndsWith("…", headline, StringComparison.Ordinal);
+        Assert.Equal(new string('b', 80), RunLogic.Headline(new string('b', 80)));
+    }
+}
+
+public class GlobalHotkeyTests
+{
+    [Theory]
+    [InlineData("Win+Shift+R", "Win+Shift+R")]
+    [InlineData("shift + win + r", "Win+Shift+R")]
+    [InlineData("Ctrl+Alt+F12", "Ctrl+Alt+F12")]
+    [InlineData("Control+Shift+7", "Ctrl+Shift+7")]
+    [InlineData("alt+ctrl+shift+R", "Ctrl+Alt+Shift+R")]
+    public void Reads_and_writes_shortcuts(string text, string expected)
+    {
+        Assert.True(GlobalHotkey.TryParse(text, out var hotkey));
+        Assert.Equal(expected, hotkey.ToString());
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("R")]
+    [InlineData("Win+Shift")]
+    [InlineData("Win+R+T")]
+    [InlineData("Win++R")]
+    [InlineData("Win+F25")]
+    [InlineData("Win+Space")]
+    public void Rejects_text_that_is_not_one_modifier_set_and_one_key(string text) => Assert.False(GlobalHotkey.TryParse(text, out _));
+
+    [Fact]
+    public void Default_is_Win_Shift_R_with_the_Windows_codes()
+    {
+        Assert.True(GlobalHotkey.TryParse(GlobalHotkey.Default, out var hotkey));
+        Assert.Equal(HotkeyModifiers.Win | HotkeyModifiers.Shift, hotkey.Modifiers);
+        Assert.Equal(0x52, hotkey.VirtualKey); // VK_R
+        Assert.True(GlobalHotkey.TryParse("Ctrl+F1", out var f1));
+        Assert.Equal(0x70, f1.VirtualKey);     // VK_F1
+    }
+}
+
 public class LocalDockerTests
 {
     [Fact]
@@ -178,6 +247,31 @@ public class ConfigAndStorageTests : IDisposable
         Assert.Equal(50, config.RunCount);
         Assert.Equal(1, config.LookbackDays);
         Assert.Equal(new[] { "a" }, config.Repos);
+    }
+
+    [Fact]
+    public void New_settings_have_their_defaults_and_round_trip()
+    {
+        var path = Path.Combine(_dir, "config.json");
+        Assert.False(new AppConfig().HidePassingRuns);
+        Assert.Equal("Win+Shift+R", new AppConfig().Hotkey);
+
+        new AppConfig { HidePassingRuns = true, Hotkey = "ctrl + alt + r" }.Save(path);
+        var config = AppConfig.Load(path);
+
+        Assert.True(config.HidePassingRuns);
+        Assert.Equal("Ctrl+Alt+R", config.Hotkey);
+    }
+
+    [Theory]
+    [InlineData("", "")]
+    [InlineData("   ", "")]
+    [InlineData(" not a key ", "not a key")]
+    public void Empty_shortcut_is_off_and_unreadable_text_is_kept(string written, string expected)
+    {
+        var config = new AppConfig { Hotkey = written };
+        config.Normalize();
+        Assert.Equal(expected, config.Hotkey);
     }
 
     [Fact]
