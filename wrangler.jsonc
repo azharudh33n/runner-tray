@@ -1,4 +1,4 @@
-// The website at https://wx8.org/ : a static Cloudflare Worker that serves _site.
+// The website at https://runnertray.wx8.org/ : a static Cloudflare Worker that serves _site.
 // Build _site first with tools/build-site.ps1, then deploy with `npx wrangler deploy`.
 // The Website workflow does both on every push to main.
 {
@@ -11,7 +11,7 @@
     "html_handling": "auto-trailing-slash"
   },
   "routes": [
-    { "pattern": "wx8.org", "custom_domain": true }
+    { "pattern": "runnertray.wx8.org", "custom_domain": true }
   ],
   "workers_dev": false,
   "preview_urls": false

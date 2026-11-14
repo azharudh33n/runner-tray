@@ -1,6 +1,6 @@
-# Publishes the website (site/ plus screenshots) to Cloudflare: https://wx8.org/
-# Needs two repository secrets: CLOUDFLARE_API_TOKEN (permission "Workers Scripts: Edit" on the
-# account, and "Workers Routes: Edit" on the wx8.org zone) and CLOUDFLARE_ACCOUNT_ID.
+# Publishes the website (site/ plus screenshots) to Cloudflare: https://runnertray.wx8.org/
+# Needs two repository secrets: CLOUDFLARE_API_TOKEN (made from Cloudflare's "Edit Cloudflare
+# Workers" token template, limited to this account and the wx8.org zone) and CLOUDFLARE_ACCOUNT_ID.
 name: Website
 
 on:
@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: website
-      url: https://wx8.org/
+      url: https://runnertray.wx8.org/
     steps:
       - uses: actions/checkout@v4
       - name: Build site
@@ -33,12 +33,15 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
-            echo "::error::Add the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID repository secrets."
-            exit 1
+            echo "::warning::Not deployed. Add the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID repository secrets."
+            echo "DEPLOYED=false" >> "$GITHUB_ENV"
+            exit 0
           fi
           npx --yes wrangler@4 deploy
+          echo "DEPLOYED=true" >> "$GITHUB_ENV"
       - name: Check the live site
+        if: env.DEPLOYED == 'true'
         run: |
           sleep 10
-          curl --fail --silent --show-error --output /dev/null https://wx8.org/
-          curl --fail --silent --show-error --output /dev/null https://wx8.org/sitemap.xml
+          curl --fail --silent --show-error --output /dev/null https://runnertray.wx8.org/
+          curl --fail --silent --show-error --output /dev/null https://runnertray.wx8.org/sitemap.xml

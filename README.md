@@ -17,7 +17,7 @@
 
 <p align="center">
   <a href="https://github.com/azharudh33n/runner-tray/releases/latest/download/RunnerTray-win-Setup.exe"><b>Download for Windows</b></a> ·
-  <a href="https://wx8.org/">Website</a> ·
+  <a href="https://runnertray.wx8.org/">Website</a> ·
   <a href="#sign-in">Sign in</a> ·
   <a href="#accessibility">Accessibility</a>
 </p>
