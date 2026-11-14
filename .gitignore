@@ -9,3 +9,6 @@ design/soak/
 
 # taste-skill working files (plans, check reports, screenshots)
 /.taste-skill/
+
+# Cloudflare wrangler local state
+.wrangler/

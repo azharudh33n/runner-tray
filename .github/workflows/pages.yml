@@ -6,7 +6,7 @@ name: Website
 on:
   push:
     branches: [main]
-    paths: ["site/**", "docs/*.png", "assets/logo*", "assets/brand/**", "tools/build-site.ps1", "wrangler.jsonc", ".github/workflows/pages.yml"]
+    paths: ["site/**", "docs/*.png", "assets/logo*", "assets/brand/**", "tools/build-site.ps1", "wrangler.jsonc", "site-worker/**", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
