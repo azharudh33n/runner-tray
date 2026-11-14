@@ -54,10 +54,17 @@ internal static class Uninstall
     {
         try
         {
-            using var key = Registry.CurrentUser.OpenSubKey(RunKey, writable: true);
-            if (key is null) return;
-            if (enabled) key.SetValue(RunValue, $"\"{LaunchPath}\"");
-            else key.DeleteValue(RunValue, throwOnMissingValue: false);
+            if (enabled)
+            {
+                // The Run key can be missing on new or cleaned-up Windows profiles: create it.
+                using var key = Registry.CurrentUser.CreateSubKey(RunKey, writable: true);
+                key.SetValue(RunValue, $"\"{LaunchPath}\"");
+            }
+            else
+            {
+                using var key = Registry.CurrentUser.OpenSubKey(RunKey, writable: true);
+                key?.DeleteValue(RunValue, throwOnMissingValue: false);
+            }
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or System.Security.SecurityException or IOException)
         {

@@ -62,6 +62,7 @@ Write-Host "2. Start it once and add the things a user would have"
 $env:RUNNERTRAY_UPDATE_DIR = (Resolve-Path $NewReleases).Path
 Start-Process (Join-Path $root 'RunnerTray.exe')
 Check (Wait-Until { Get-Process RunnerTray -ErrorAction SilentlyContinue } 20 'RunnerTray running') 'app starts from the stable launcher'
+New-Item -Path $runKey -Force -ErrorAction SilentlyContinue | Out-Null
 New-ItemProperty -Path $runKey -Name RunnerTray -Value "`"$(Join-Path $root 'RunnerTray.exe')`"" -Force | Out-Null
 cmdkey /generic:RunnerTray:github /user:RunnerTray /pass:test-token | Out-Null
 Check (Test-Path $settings) 'settings folder created'
