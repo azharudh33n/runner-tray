@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>RunnerTray: see failed GitHub Actions runs from the Windows tray</title>
-<meta name="description" content="Free, open-source Windows tray app for GitHub Actions. Know when a workflow run fails or a self-hosted runner goes offline, without keeping a browser tab open.">
+<meta name="description" content="Free, open-source Windows tray app for GitHub Actions. See failed workflow runs and offline self-hosted runners without keeping a browser tab open.">
 <meta name="keywords" content="GitHub Actions, Windows tray app, system tray, CI status, workflow runs, self-hosted runners, build notifications, GitHub Actions monitor, desktop notifier, DevOps">
 <meta name="author" content="RunnerTray contributors">
 <meta name="theme-color" content="#0E1525">
@@ -17,7 +17,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="RunnerTray">
 <meta property="og:title" content="RunnerTray: see failed GitHub Actions runs from the Windows tray">
-<meta property="og:description" content="Know when a workflow run fails or a self-hosted runner goes offline, without keeping a browser tab open. Free and open source for Windows 10 and 11.">
+<meta property="og:description" content="See failed workflow runs and offline self-hosted runners without keeping a browser tab open. Free and open source for Windows 10 and 11.">
 <meta property="og:url" content="https://runnertray.wx8.org/">
 <meta property="og:image" content="https://runnertray.wx8.org/og.png">
 <meta property="og:image:type" content="image/png">
@@ -27,15 +27,13 @@
 <meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="RunnerTray: see failed GitHub Actions runs from the Windows tray">
-<meta name="twitter:description" content="Know when a workflow run fails or a self-hosted runner goes offline, without keeping a browser tab open.">
+<meta name="twitter:description" content="See failed workflow runs and offline self-hosted runners without keeping a browser tab open.">
 <meta name="twitter:image" content="https://runnertray.wx8.org/og.png">
 <meta name="twitter:image:alt" content="RunnerTray: stop checking a browser tab for GitHub Actions. The RunnerTray panel shows a failed run, runs in progress and self-hosted runners.">
 
 <meta name="site-kind" content="software">
 <meta name="page-type" content="software">
 
-<!-- start.mjs brand --page software --bg "#0E1525" --ink "#F7F6F2" --accent "#F26B3A" --muted "#8A94A6" --type bricolage --radius sharp;
-     the client's own faces replace the pairing's text and mono faces (docs/brand/README.md: Bricolage Grotesque, IBM Plex Sans, JetBrains Mono) -->
 <link rel="preload" href="fonts/BricolageGrotesque-w96.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/IBMPlexSans-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="fonts/fonts.css">
@@ -155,7 +153,7 @@
   .rt-pair { display: flex; gap: 24px; align-items: flex-start; }
   .rt-pair > .rt-panel { flex: 1 1 560px; min-width: 0; }
   .rt-pair > .rt-say { flex: 0 1 340px; }
-  @media (max-width: 1023px) { .rt-pair { flex-direction: column; align-items: stretch; } .rt-pair > .rt-say { flex: none; } }
+  @media (max-width: 1023px) { .rt-pair { flex-direction: column; align-items: stretch; } .rt-pair > :is(.rt-say, .rt-panel) { flex: none; } }
   /* words under the statement in the ink: text people read keeps 7:1 */
   #usage .mo-la__sub { color: var(--ink); }
   /* the sign-in window keeps its true width from 640px and is cut by the frame's right edge */
@@ -187,7 +185,7 @@
   .rt-sec--ic img { width: 20px; height: 20px; }
   #features .panel { --p-h: 300px; }
   @media (max-width: 1279px) { #features .panel { --p-h: 260px; } }
-  @media (max-width: 639px) { #features .panel { --p-h: 140px; } #features .stage { --fade-h: 40px; } }
+  @media (max-width: 639px) { #features .stage { --fade-h: 40px; } }
   /* the statement's facts under it, on the wrap's lines */
   .usage__rows { margin-top: var(--s-7); }
   /* the tablet held upright: the statement set larger (two lines); the FAQ and the footer a little tighter, so each stays one screen */
@@ -205,10 +203,46 @@
   .pairs > li > p { margin: 0; color: var(--muted); max-width: 52ch; }
   .pairs > li > .link { justify-self: start; }
   #features .panel--flush { background: var(--p-surface, #171e2e); }
+  @media (max-width: 1279px) { .pairs > li { grid-template-columns: 7.5rem minmax(0, 1fr); } }
   @media (max-width: 639px) { .pairs > li { grid-template-columns: 1fr; } }
   #sign-in .frame--split { --ratio: 108%; }
-  @media (min-width: 640px) and (max-width: 1023px) { #sign-in .frame--split { --ratio: 0px; height: calc(100svh - 625px); } }
-  @media (max-width: 639px) { #sign-in .frame--split { --ratio: 0px; height: 100%; margin-top: 0; } }
+  @media (min-width: 640px) and (max-width: 1023px) { #sign-in .frame--split { --ratio: 64%; } }
+  @media (max-width: 639px) { #sign-in .frame--split { --ratio: 118%; } }
+
+  /* ---- Sections size to their content.
+     The kit makes every section exactly one or two screens tall, which left large empty areas under
+     short sections. Here each section is as tall as its content, with spacing that varies by role. */
+  html body main > :is(section, .section):not(.hero, .section--hero),
+  html body footer.closing {
+    height: auto; min-height: 0; display: block;
+    padding: var(--sec-top, clamp(56px, 6vw, 88px)) 0 var(--sec-bottom, clamp(56px, 6vw, 88px));
+    scroll-margin-top: max(0px, calc(var(--nav) + 24px - var(--sec-top, clamp(56px, 6vw, 88px))));
+  }
+  html body main > :is(section, .section):not(.hero, .section--hero) > .wrap,
+  html body footer.closing > .wrap { height: auto; display: flex; flex-direction: column; }
+  html body main > :is(section, .section):is(.g2, .g2m) > :is(.wrap, .container),
+  html body footer.closing.g2m > .wrap { display: flex; flex-direction: column; row-gap: var(--card-gap); }
+  html body main > :is(section, .section) > .wrap > .fill { flex: none; }
+  /* rhythm: the problem follows the hero closely; the usage statement and the closing get more air;
+     the surface band keeps equal space inside its colour */
+  #problem { --sec-top: clamp(40px, 5vw, 72px); }
+  #features { --sec-top: clamp(48px, 5vw, 80px); }
+  #usage { --sec-top: clamp(72px, 8vw, 120px); --sec-bottom: clamp(72px, 8vw, 120px); }
+  #accessibility { --sec-top: clamp(64px, 7vw, 96px); --sec-bottom: clamp(64px, 7vw, 96px); }
+  #open { --sec-bottom: clamp(48px, 5vw, 80px); }
+  #faq { --sec-top: clamp(48px, 5vw, 80px); }
+  #contact { --sec-top: clamp(72px, 8vw, 120px); --sec-bottom: var(--s-7); }
+  #faq > .wrap { row-gap: var(--s-6); }
+  html body footer.closing > .wrap { row-gap: var(--s-8); }
+  /* the accessibility frame as tall as the panel and the Narrator note inside it, not half its width */
+  @media (min-width: 1024px) { #accessibility .frame--lit { --ratio: 0px; height: 384px; } }
+  @media (min-width: 640px) and (max-width: 1023px) { #accessibility .frame--lit { --ratio: 0px; height: 520px; } }
+  @media (max-width: 639px) { #accessibility .frame--lit { --ratio: 0px; height: 680px; } }
+  @media (max-width: 639px) {
+    #features .panel { --p-h: 240px; }
+    /* only the page's foot makes room for the phone's fixed download bar */
+    html body footer.closing { padding-bottom: calc(var(--sec-bottom, 48px) + var(--bar, 0px)); }
+  }
 </style>
 <script type="application/ld+json">
 {
@@ -253,14 +287,6 @@
 </script>
 </head>
 <body>
-<!-- type: software (site-kind software)
-     deal: hero split, nav nav-mega, close close-word, footer footer-dark, rhythm surface-pairs (accessibility and sign-in on the surface band),
-           buttons solid, mark arc (the client's own logo replaces it), radius sharp, lit ground sky,
-           palette: the client's own (start.mjs brand: Track Ink ground, Paper ink, Runner Orange accent, Lane Grey muted),
-           type: the client's own faces (Bricolage Grotesque, IBM Plex Sans, JetBrains Mono), grounds: none dealt
-     effect: silk-folds in the one [data-visual] frame (#sign-in); card grounds: fluted-glass (#features)
-     moments: letters-assemble in #usage (the measured CPU figure builds itself as it rises)
-     loops: the hero panel's live timers (pause button); the notification stack in #features; the Docker diagram's pulse (second screen of #features) -->
 <header class="nav">
   <div class="wrap nav__bar">
     <a class="skip-link" href="#top">Skip to content</a>
