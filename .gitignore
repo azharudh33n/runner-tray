@@ -6,3 +6,6 @@ publish/
 _site/
 design/logo/renders/
 design/soak/
+
+# taste-skill working files (plans, check reports, screenshots)
+/.taste-skill/

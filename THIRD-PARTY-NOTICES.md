@@ -22,6 +22,13 @@ The MIT licence text: https://opensource.org/license/mit
 
 The website loads its fonts from Google Fonts. The app itself uses Segoe UI, which is part of Windows.
 
+## Website only
+
+| Component | Licence | Source |
+|---|---|---|
+| taste-skill design kit (the CSS and scripts in `site/assets/`) | MIT, see `site/assets/LICENSE-taste-skill.txt` | https://github.com/leonxlnx/taste-skill |
+| GitHub, GitHub Actions, Docker and Windows icons | CC0 (gilbarbara/logos), see `site/assets/icons/icons-credits.json` | https://github.com/gilbarbara/logos |
+
 ## Tools used to build RunnerTray (not shipped)
 
 | Tool | Licence | Source |
@@ -34,4 +41,4 @@ The website loads its fonts from Google Fonts. The app itself uses Segoe UI, whi
 ## Trademarks
 
 GitHub and GitHub Actions are trademarks of GitHub, Inc. Windows is a trademark of Microsoft
-Corporation. The RunnerTray name and logo are covered by [TRADEMARKS.md](TRADEMARKS.md).
+Corporation. Docker is a trademark of Docker, Inc. The RunnerTray name and logo are covered by [TRADEMARKS.md](TRADEMARKS.md).
