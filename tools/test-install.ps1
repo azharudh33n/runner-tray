@@ -65,7 +65,7 @@ Check (Wait-Until { Get-Process RunnerTray -ErrorAction SilentlyContinue } 20 'R
 New-Item -Path $runKey -Force -ErrorAction SilentlyContinue | Out-Null
 New-ItemProperty -Path $runKey -Name RunnerTray -Value "`"$(Join-Path $root 'RunnerTray.exe')`"" -Force | Out-Null
 cmdkey /generic:RunnerTray:github /user:RunnerTray /pass:test-token | Out-Null
-Check (Test-Path $settings) 'settings folder created'
+Check (Wait-Until { Test-Path $settings } 20 'settings folder') 'settings folder created'
 
 Write-Host "3. Update with the app's own updater"
 $downloaded = Wait-Until { Test-Path (Join-Path $root "packages\RunnerTray-$NewVersion-full.nupkg") } 90 'update downloaded'
