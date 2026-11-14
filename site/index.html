@@ -155,7 +155,7 @@
   .rt-pair { display: flex; gap: 24px; align-items: flex-start; }
   .rt-pair > .rt-panel { flex: 1 1 560px; min-width: 0; }
   .rt-pair > .rt-say { flex: 0 1 340px; }
-  @media (max-width: 1023px) { .rt-pair { flex-direction: column; align-items: stretch; } .rt-pair > .rt-say { flex: none; } }
+  @media (max-width: 1023px) { .rt-pair { flex-direction: column; align-items: stretch; } .rt-pair > :is(.rt-say, .rt-panel) { flex: none; } }
   /* words under the statement in the ink: text people read keeps 7:1 */
   #usage .mo-la__sub { color: var(--ink); }
   /* the sign-in window keeps its true width from 640px and is cut by the frame's right edge */
@@ -187,7 +187,7 @@
   .rt-sec--ic img { width: 20px; height: 20px; }
   #features .panel { --p-h: 300px; }
   @media (max-width: 1279px) { #features .panel { --p-h: 260px; } }
-  @media (max-width: 639px) { #features .panel { --p-h: 140px; } #features .stage { --fade-h: 40px; } }
+  @media (max-width: 639px) { #features .stage { --fade-h: 40px; } }
   /* the statement's facts under it, on the wrap's lines */
   .usage__rows { margin-top: var(--s-7); }
   /* the tablet held upright: the statement set larger (two lines); the FAQ and the footer a little tighter, so each stays one screen */
@@ -205,10 +205,46 @@
   .pairs > li > p { margin: 0; color: var(--muted); max-width: 52ch; }
   .pairs > li > .link { justify-self: start; }
   #features .panel--flush { background: var(--p-surface, #171e2e); }
+  @media (max-width: 1279px) { .pairs > li { grid-template-columns: 7.5rem minmax(0, 1fr); } }
   @media (max-width: 639px) { .pairs > li { grid-template-columns: 1fr; } }
   #sign-in .frame--split { --ratio: 108%; }
-  @media (min-width: 640px) and (max-width: 1023px) { #sign-in .frame--split { --ratio: 0px; height: calc(100svh - 625px); } }
-  @media (max-width: 639px) { #sign-in .frame--split { --ratio: 0px; height: 100%; margin-top: 0; } }
+  @media (min-width: 640px) and (max-width: 1023px) { #sign-in .frame--split { --ratio: 64%; } }
+  @media (max-width: 639px) { #sign-in .frame--split { --ratio: 118%; } }
+
+  /* ---- Sections size to their content.
+     The kit makes every section exactly one or two screens tall, which left large empty areas under
+     short sections. Here each section is as tall as its content, with spacing that varies by role. */
+  html body main > :is(section, .section):not(.hero, .section--hero),
+  html body footer.closing {
+    height: auto; min-height: 0; display: block;
+    padding: var(--sec-top, clamp(56px, 6vw, 88px)) 0 var(--sec-bottom, clamp(56px, 6vw, 88px));
+    scroll-margin-top: max(0px, calc(var(--nav) + 24px - var(--sec-top, clamp(56px, 6vw, 88px))));
+  }
+  html body main > :is(section, .section):not(.hero, .section--hero) > .wrap,
+  html body footer.closing > .wrap { height: auto; display: flex; flex-direction: column; }
+  html body main > :is(section, .section):is(.g2, .g2m) > :is(.wrap, .container),
+  html body footer.closing.g2m > .wrap { display: flex; flex-direction: column; row-gap: var(--card-gap); }
+  html body main > :is(section, .section) > .wrap > .fill { flex: none; }
+  /* rhythm: the problem follows the hero closely; the usage statement and the closing get more air;
+     the surface band keeps equal space inside its colour */
+  #problem { --sec-top: clamp(40px, 5vw, 72px); }
+  #features { --sec-top: clamp(48px, 5vw, 80px); }
+  #usage { --sec-top: clamp(72px, 8vw, 120px); --sec-bottom: clamp(72px, 8vw, 120px); }
+  #accessibility { --sec-top: clamp(64px, 7vw, 96px); --sec-bottom: clamp(64px, 7vw, 96px); }
+  #open { --sec-bottom: clamp(48px, 5vw, 80px); }
+  #faq { --sec-top: clamp(48px, 5vw, 80px); }
+  #contact { --sec-top: clamp(72px, 8vw, 120px); --sec-bottom: var(--s-7); }
+  #faq > .wrap { row-gap: var(--s-6); }
+  html body footer.closing > .wrap { row-gap: var(--s-8); }
+  /* the accessibility frame as tall as the panel and the Narrator note inside it, not half its width */
+  @media (min-width: 1024px) { #accessibility .frame--lit { --ratio: 0px; height: 384px; } }
+  @media (min-width: 640px) and (max-width: 1023px) { #accessibility .frame--lit { --ratio: 0px; height: 520px; } }
+  @media (max-width: 639px) { #accessibility .frame--lit { --ratio: 0px; height: 680px; } }
+  @media (max-width: 639px) {
+    #features .panel { --p-h: 240px; }
+    /* only the page's foot makes room for the phone's fixed download bar */
+    html body footer.closing { padding-bottom: calc(var(--sec-bottom, 48px) + var(--bar, 0px)); }
+  }
 </style>
 <script type="application/ld+json">
 {
