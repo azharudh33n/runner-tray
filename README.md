@@ -100,11 +100,12 @@ Every build runs [Axe.Windows](https://github.com/microsoft/axe-windows) on the 
 3. Click the icon, then **Sign in with GitHub** (see below).
 
 RunnerTray updates itself from GitHub Releases. Turn this off in **Settings**.
-Uninstall it from **Settings > Apps > Installed apps**. Uninstalling also removes your saved
-sign-in, the Start with Windows entry, and the cache; your settings stay for a reinstall.
+**Uninstall:** right-click the tray icon, then **Uninstall RunnerTray…**, or use **Settings > Apps >
+Installed apps**. Both remove the app, your saved sign-in, Start with Windows, the cache and logs.
+From the tray menu you can also remove your settings; Settings > Apps keeps them for a reinstall.
 
-**Portable:** `RunnerTray-win-Portable.zip`. Extract it anywhere and run `RunnerTray.exe`.
-No installation, and it updates itself too.
+**Portable:** `RunnerTray-win-Portable.zip`. Extract it anywhere and run `RunnerTray.exe`. It updates
+itself too. To remove it, right-click the tray icon, select **Remove RunnerTray…**, then delete the folder.
 
 **Windows SmartScreen:** RunnerTray is not code-signed yet, so Windows may show
 "Windows protected your PC" the first time. Select **More info**, then **Run anyway**.
@@ -209,10 +210,16 @@ contains no tokens.
 
 ## Privacy
 
+Full details: [PRIVACY.md](PRIVACY.md). Security: [SECURITY.md](SECURITY.md).
+
 RunnerTray talks only to `github.com` and `api.github.com`, and to your local Docker engine if
 you turn that on. It sends no telemetry. On your PC it keeps: your sign-in (Windows Credential
 Manager), settings (`%APPDATA%\RunnerTray`), and a cache, the last data, and logs
 (`%LOCALAPPDATA%\RunnerTray-data`). Logs never contain tokens.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md). Planned work: [ROADMAP.md](docs/ROADMAP.md).
 
 ## Build and test
 
@@ -273,6 +280,7 @@ The source code is open source under the [MIT license](LICENSE).
 The RunnerTray name and logos are trademarks of the RunnerTray project and are **not** covered by
 the MIT license. You may use them to refer to RunnerTray and in unchanged copies of official
 releases. A fork or changed version needs its own name and logo. Details:
-[TRADEMARKS.md](TRADEMARKS.md) · Brand guidelines and logo files: [docs/brand](docs/brand/README.md)
+[TRADEMARKS.md](TRADEMARKS.md) · Brand guidelines and logo files: [docs/brand](docs/brand/README.md) ·
+Third-party licences: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
 
 RunnerTray is not affiliated with GitHub, Inc. GitHub and GitHub Actions are trademarks of GitHub, Inc.

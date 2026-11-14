@@ -1,0 +1,47 @@
+name: Bug report
+description: Something does not work as expected.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Security problems: please use [private reporting](https://github.com/azharudh33n/runner-tray/security/advisories/new) instead.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What did you do, and what did you see?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics report
+      description: Right-click the RunnerTray tray icon, select Diagnostics, then Copy, and paste here. It contains no tokens.
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: RunnerTray version
+      placeholder: "1.0.0"
+  - type: dropdown
+    id: install
+    attributes:
+      label: How did you install it?
+      options:
+        - Setup.exe (installed)
+        - Portable zip
+        - winget
+        - Built from source
+  - type: checkboxes
+    id: a11y
+    attributes:
+      label: Accessibility
+      options:
+        - label: This affects keyboard, screen reader, high contrast or text size use.
