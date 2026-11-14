@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <title>RunnerTray concept B: Track</title>
+  <!-- B "Track": a running track (the loop of continuous integration); the runner is a light breaking out on the bend. -->
+  <path d="M172.2 60.5 A68 68 0 0 0 164 60 H92 A68 68 0 0 0 92 196 H164 A68 68 0 0 0 231.5 119.8 A42 42 0 0 1 201.7 132.5 A38 38 0 0 1 164 166 H92 A38 38 0 0 1 92 90 H159.5 A42 42 0 0 1 172.2 60.5 Z" fill="#000"/>
+  <circle cx="201.5" cy="90.5" r="26" fill="#000"/>
+</svg>

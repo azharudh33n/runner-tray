@@ -6,5 +6,6 @@ Remove-Item $out -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force $out | Out-Null
 Copy-Item (Join-Path $root 'site\*') $out -Recurse
 Copy-Item (Join-Path $root 'docs\*.png') $out
-Copy-Item (Join-Path $root 'assets\logo.svg'), (Join-Path $root 'assets\logo-256.png') $out
+Copy-Item (Join-Path $root 'assets\logo.svg'), (Join-Path $root 'assets\logo-*.png'), (Join-Path $root 'assets\apple-touch-icon.png') $out
+Copy-Item (Join-Path $root 'assets\brand\lockup-horizontal-reversed.svg'), (Join-Path $root 'assets\brand\tray-run-dark.svg') $out
 Write-Host "Site built in $out"

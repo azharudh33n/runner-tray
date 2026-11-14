@@ -13,6 +13,7 @@ internal static class Screenshots
     public static void RenderAll(string folder, bool live = false)
     {
         Directory.CreateDirectory(folder);
+        _assets = Path.GetFullPath(Path.Combine(folder, "..", "assets"));
         using var services = live ? Services.Create(AppConfig.Load()) : null;
         IDataSource source = services is not null ? services.Source : new DemoSource();
         var snapshot = Task.Run(() => source.FetchAsync(CancellationToken.None)).GetAwaiter().GetResult();
@@ -72,20 +73,20 @@ internal static class Screenshots
         g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
 
         // Desktop wallpaper: deep blue gradient with two soft glows.
-        using (var bg = new LinearGradientBrush(new Rectangle(0, 0, w, h), Color.FromArgb(18, 28, 58), Color.FromArgb(9, 12, 22), 55f))
+        using (var bg = new LinearGradientBrush(new Rectangle(0, 0, w, h), Color.FromArgb(20, 30, 52), Color.FromArgb(10, 14, 26), 55f))
         {
             g.FillRectangle(bg, 0, 0, w, h);
         }
 
-        Glow(g, new RectangleF(-200, -260, 900, 700), Color.FromArgb(46, 88, 166, 255));
-        Glow(g, new RectangleF(520, 300, 700, 600), Color.FromArgb(30, 63, 185, 80));
+        Glow(g, new RectangleF(-200, -260, 900, 700), Color.FromArgb(40, 242, 107, 58));
+        Glow(g, new RectangleF(520, 300, 700, 600), Color.FromArgb(26, 88, 166, 255));
 
         // Taskbar with tray icon and clock.
         using (var tb = new SolidBrush(Color.FromArgb(240, 22, 25, 31))) g.FillRectangle(tb, 0, h - taskbar, w, taskbar);
         using var clockFont = new Font("Segoe UI", 9f);
         TextRenderer.DrawText(g, "12:45\n13-11-2026", clockFont, new Rectangle(w - 104, h - taskbar, 96, taskbar), Color.White,
             TextFormatFlags.VerticalCenter | TextFormatFlags.HorizontalCenter);
-        using (var tray = Icons.Draw(TrayState.Busy, 22)) g.DrawImage(tray, w - 140, h - taskbar + 13);
+        using (var tray = Icons.Tray(TrayState.Busy, false, 24)) g.DrawImage(tray, w - 142, h - taskbar + 12, 24, 24);
         using (var hl = new Pen(Color.FromArgb(120, 255, 255, 255))) g.DrawLine(hl, w - 146, h - 6, w - 112, h - 6);
 
         // Popup with a soft shadow, right above the tray icon.
@@ -111,11 +112,10 @@ internal static class Screenshots
         }
 
         // Title and feature list.
-        using var big = new Font("Segoe UI Semibold", 40f);
         using var mid = new Font("Segoe UI", 15f);
         using var small = new Font("Segoe UI", 11.5f);
-        TextRenderer.DrawText(g, "RunnerTray", big, new Point(64, 70), Color.White);
-        TextRenderer.DrawText(g, "GitHub Actions in your Windows tray", mid, new Point(70, 148), Color.FromArgb(201, 209, 217));
+        DrawLockup(g, 64, 64, 400);
+        TextRenderer.DrawText(g, "GitHub Actions in your Windows tray", mid, new Point(70, 156), Color.FromArgb(201, 209, 217));
         var features = new (Glyph Glyph, Color Color, string Text)[]
         {
             (Glyph.Play, Theme.Blue, "Live jobs with timers"),
@@ -152,7 +152,7 @@ internal static class Screenshots
         using var appFont = new Font("Segoe UI", 8.5f);
         using var titleFont = new Font("Segoe UI Semibold", 10.5f);
         using var bodyFont = new Font("Segoe UI", 9.5f);
-        using (var icon = Icons.Draw(TrayState.Busy, 16)) g.DrawImage(icon, 14, 12);
+        using (var icon = Icons.Tray(TrayState.Idle, false, 16)) g.DrawImage(icon, 14, 12);
         TextRenderer.DrawText(g, "RunnerTray", appFont, new Point(36, 11), Color.FromArgb(200, 200, 205));
         Badge.Draw(g, new RectangleF(16, 44, 34, 34), Theme.Red, Glyph.Cross);
         TextRenderer.DrawText(g, "atlas-mobile failed", titleFont, new Point(62, 40), Color.White);
@@ -170,7 +170,7 @@ internal static class Screenshots
         g.Clear(Theme.Bg);
         for (var i = 0; i < items.Length; i++)
         {
-            using var icon = Icons.Draw(items[i], 40);
+            using var icon = Icons.Tray(items[i], false, 40);
             g.DrawImage(icon, i * cell + (cell - 40) / 2, 14);
             TextRenderer.DrawText(g, Icons.Words(items[i]), Theme.Body, new Rectangle(i * cell, 64, cell, 26), Theme.Fg,
                 TextFormatFlags.HorizontalCenter);
@@ -206,7 +206,8 @@ internal static class Screenshots
         for (var i = 14; i > 0; i--)
         {
             using var shadow = new SolidBrush(Color.FromArgb(7, 0, 0, 0));
-            using var path = Theme.Rounded(new RectangleF(r.X - i, r.Y - i + 8, r.Width + 2 * i, r.Height + 2 * i), radius + i);
+            float grow = i;
+            using var path = Theme.Rounded(new RectangleF(r.X - grow, r.Y - grow + 8f, r.Width + 2f * grow, r.Height + 2f * grow), radius + grow);
             g.FillPath(shadow, path);
         }
     }
@@ -238,28 +239,22 @@ internal static class Screenshots
         g.SmoothingMode = SmoothingMode.AntiAlias;
         g.InterpolationMode = InterpolationMode.HighQualityBicubic;
         g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-        using (var bg = new LinearGradientBrush(new Rectangle(0, 0, w, h), Color.FromArgb(16, 26, 54), Color.FromArgb(9, 12, 22), 30f))
+        using (var bg = new LinearGradientBrush(new Rectangle(0, 0, w, h), Color.FromArgb(20, 30, 52), Color.FromArgb(10, 14, 26), 30f))
         {
             g.FillRectangle(bg, 0, 0, w, h);
         }
 
-        Glow(g, new RectangleF(600, -300, 900, 800), Color.FromArgb(60, 31, 111, 235));
-        Glow(g, new RectangleF(-200, 300, 700, 600), Color.FromArgb(28, 63, 185, 80));
+        Glow(g, new RectangleF(600, -300, 900, 800), Color.FromArgb(46, 242, 107, 58));
+        Glow(g, new RectangleF(-200, 300, 700, 600), Color.FromArgb(24, 88, 166, 255));
 
-        if (File.Exists(logoPath))
-        {
-            using var logo = Image.FromFile(logoPath);
-            g.DrawImage(logo, 72, 88, 128, 128);
-        }
-
-        using var big = new Font("Segoe UI Semibold", 52f);
+        _ = logoPath; // the lockup below includes the symbol
         using var mid = new Font("Segoe UI", 22f);
         using var small = new Font("Segoe UI", 15f);
-        TextRenderer.DrawText(g, "RunnerTray", big, new Point(64, 236), Color.White);
+        DrawLockup(g, 72, 196, 560);
         TextRenderer.DrawText(g, "GitHub Actions status in your\nWindows system tray", mid,
             new Rectangle(70, 338, 620, 130), Color.FromArgb(201, 209, 217), TextFormatFlags.WordBreak);
         TextRenderer.DrawText(g, "Free · Open source · Windows 10 and 11", small, new Point(72, 470), Color.FromArgb(157, 167, 179));
-        TextRenderer.DrawText(g, "github.com/azharudh33n/runner-tray", small, new Point(72, 548), Color.FromArgb(121, 192, 255));
+        TextRenderer.DrawText(g, "github.com/azharudh33n/runner-tray", small, new Point(72, 548), Color.FromArgb(255, 138, 92));
 
         // Panel on the right, slightly cut off at the bottom, with a shadow.
         var scale = 560f / panel.Height;
@@ -276,5 +271,22 @@ internal static class Screenshots
         }
 
         return bmp;
+    }
+
+    /// <summary>The reversed horizontal lockup (symbol and wordmark), drawn from assets/lockup-horizontal-reversed.png.</summary>
+    private static string? _assets;
+
+    private static void DrawLockup(Graphics g, int x, int y, int width)
+    {
+        var file = _assets is null ? null : Path.Combine(_assets, "lockup-horizontal-reversed.png");
+        if (file is null || !File.Exists(file))
+        {
+            using var f = new Font("Segoe UI Semibold", width / 9f);
+            TextRenderer.DrawText(g, "RunnerTray", f, new Point(x, y), Color.White);
+            return;
+        }
+
+        using var img = Image.FromFile(file);
+        g.DrawImage(img, x, y, width, width * img.Height / img.Width);
     }
 }

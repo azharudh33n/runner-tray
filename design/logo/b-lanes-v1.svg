@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- B "Lanes": jobs running side by side; the live one ends in a light. -->
+  <rect x="36" y="38" width="136" height="44" rx="22" fill="#000"/>
+  <rect x="36" y="106" width="104" height="44" rx="22" fill="#000"/>
+  <circle cx="198" cy="128" r="22" fill="#000"/>
+  <rect x="36" y="174" width="168" height="44" rx="22" fill="#000"/>
+</svg>

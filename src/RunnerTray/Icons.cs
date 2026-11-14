@@ -72,10 +72,15 @@ internal static class Badge
     }
 }
 
-/// <summary>Tray icons, drawn at runtime with the same badges.</summary>
+/// <summary>
+/// Tray icons: the RunnerTray "Track" mark whose light shows the status with a colour and a shape.
+/// Prebuilt PNGs (TrayIcons/*.png, from tools/make-icon.ps1) are embedded per status, taskbar theme
+/// (dark or light) and size; the size closest to the system's small-icon size is used.
+/// </summary>
 internal static class Icons
 {
-    private static readonly Dictionary<TrayState, Icon> Cache = new();
+    private static readonly int[] Sizes = { 16, 20, 24, 32, 40, 48 };
+    private static readonly Dictionary<(TrayState, bool, int), Icon> Cache = new();
 
     public static Color ColorOf(TrayState s) => s switch
     {
@@ -92,7 +97,7 @@ internal static class Icons
         TrayState.Busy => Glyph.Play,
         TrayState.Failing => Glyph.Cross,
         TrayState.Error => Glyph.Bang,
-        _ => Glyph.Dots,
+        _ => Glyph.Dash,
     };
 
     public static string Words(TrayState s) => s switch
@@ -100,19 +105,56 @@ internal static class Icons
         TrayState.Idle => "All passing",
         TrayState.Busy => "Jobs running",
         TrayState.Failing => "A run failed",
-        TrayState.Error => "GitHub unreachable",
+        TrayState.Error => "Needs attention",
         _ => "Loading",
     };
 
+    private static string FileState(TrayState s) => s switch
+    {
+        TrayState.Idle => "pass",
+        TrayState.Busy => "run",
+        TrayState.Failing => "fail",
+        TrayState.Error => "error",
+        _ => "idle",
+    };
+
+    /// <summary>True when Windows uses a light taskbar (Settings > Personalization > Colors).</summary>
+    public static bool LightTaskbar()
+    {
+        using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+        return key?.GetValue("SystemUsesLightTheme") is int v && v == 1;
+    }
+
+    /// <summary>Forget cached icons, for example after the taskbar theme or display scale changed.</summary>
+    public static void Reset()
+    {
+        foreach (var icon in Cache.Values) icon.Dispose();
+        Cache.Clear();
+    }
+
     public static Icon Get(TrayState s)
     {
-        if (!Cache.TryGetValue(s, out var icon))
+        var light = LightTaskbar();
+        var want = SystemInformation.SmallIconSize.Width;
+        var size = Sizes.FirstOrDefault(x => x >= want, Sizes[^1]);
+        if (Cache.TryGetValue((s, light, size), out var cached)) return cached;
+
+        Icon icon;
+        var name = $"RunnerTray.TrayIcons.{FileState(s)}-{(light ? "light" : "dark")}-{size}.png";
+        using var stream = typeof(Icons).Assembly.GetManifestResourceStream(name);
+        if (stream is not null && !Theme.HighContrast)
         {
-            using var bmp = Draw(s, 32);
+            using var bmp = new Bitmap(stream);
             icon = Icon.FromHandle(bmp.GetHicon());
-            Cache[s] = icon;
+        }
+        else
+        {
+            // High contrast mode, or a missing file: draw a status badge in system colours.
+            using var bmp = Draw(s, size);
+            icon = Icon.FromHandle(bmp.GetHicon());
         }
 
+        Cache[(s, light, size)] = icon;
         return icon;
     }
 
@@ -120,11 +162,17 @@ internal static class Icons
     {
         var bmp = new Bitmap(size, size);
         using var g = Graphics.FromImage(bmp);
-        // Tray icons sit on the taskbar, not on the app background: always use the colour palette
-        // with a dark glyph, which reads on light and dark taskbars.
         var fill = Theme.HighContrast ? SystemColors.Highlight : ColorOf(s);
-        var ink = Theme.HighContrast ? SystemColors.HighlightText : Color.FromArgb(13, 17, 23);
+        var ink = Theme.HighContrast ? SystemColors.HighlightText : Color.FromArgb(14, 21, 37);
         Badge.Draw(g, new RectangleF(1, 1, size - 2.5f, size - 2.5f), fill, GlyphOf(s), ink);
         return bmp;
+    }
+
+    /// <summary>A tray icon image for screenshots.</summary>
+    public static Bitmap Tray(TrayState s, bool light, int size)
+    {
+        using var stream = typeof(Icons).Assembly.GetManifestResourceStream(
+            $"RunnerTray.TrayIcons.{FileState(s)}-{(light ? "light" : "dark")}-{Sizes.FirstOrDefault(x => x >= size, 48)}.png");
+        return stream is null ? Draw(s, size) : new Bitmap(new Bitmap(stream), size, size);
     }
 }

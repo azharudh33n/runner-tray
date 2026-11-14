@@ -113,7 +113,7 @@ public sealed class TokenChain : ITokenSource
             var token = await s.GetTokenAsync(ct);
             if (token is not null)
             {
-                if (_active != s)
+                if (!ReferenceEquals(_active, s))
                 {
                     Log.Info($"Using GitHub token from: {s.Kind}");
                 }

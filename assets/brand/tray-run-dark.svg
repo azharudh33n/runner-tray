@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img">
+  <title>RunnerTray: run</title>
+  <path d="M13.71 10 H10 A9.5 9.5 0 0 0 10 29 H16 A9.5 9.5 0 0 0 25.17 21.97 A8.6 8.6 0 0 1 19.71 22.86 A5 5 0 0 1 16 24.5 H10 A5 5 0 0 1 10 14.5 H12.52 A8.6 8.6 0 0 1 13.71 10 Z" fill="#F7F6F2"/>
+  <circle cx="21.13" cy="14.37" r="7" fill="#58A6FF"/>
+  <path d="M19.03 10.87 L24.98 14.37 L19.03 17.87 Z" fill="#0E1525"/>
+</svg>

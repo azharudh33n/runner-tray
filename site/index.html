@@ -7,11 +7,12 @@
   <meta name="description" content="Free, open-source Windows tray app for GitHub Actions. See running and failed workflow runs, self-hosted runner status, and get failure notifications. Sign in with GitHub in a minute.">
   <meta name="keywords" content="GitHub Actions, Windows tray app, system tray, CI status, workflow runs, self-hosted runners, build notifications, GitHub Actions monitor, desktop notifier, DevOps">
   <meta name="author" content="RunnerTray contributors">
-  <meta name="theme-color" content="#0d1117">
+  <meta name="theme-color" content="#0E1525">
   <link rel="canonical" href="https://azharudh33n.github.io/runner-tray/">
+  <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="icon" type="image/svg+xml" href="logo.svg">
-  <link rel="icon" type="image/png" sizes="256x256" href="logo-256.png">
-  <link rel="apple-touch-icon" href="logo-256.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
 
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="RunnerTray">
@@ -29,7 +30,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 
   <script type="application/ld+json">
@@ -92,8 +93,7 @@
 
   <header class="top">
     <a class="brand" href="./" aria-label="RunnerTray home">
-      <img src="logo.svg" alt="" width="32" height="32">
-      <span>RunnerTray</span>
+      <img src="lockup-horizontal-reversed.svg" alt="RunnerTray" width="150" height="30">
     </a>
     <nav aria-label="Main">
       <ul>
@@ -126,7 +126,7 @@
         <img class="panel" src="popup.png" width="480" height="640"
              alt="RunnerTray panel: 2 running, 1 queued, 1 failing; jobs on this machine with timers; recent runs with repository, workflow, branch and author.">
         <div class="taskbar" aria-hidden="true">
-          <img src="logo.svg" alt="" width="22" height="22">
+          <img src="tray-run-dark.svg" alt="" width="24" height="24">
           <span class="clock">12:45</span>
         </div>
       </div>
@@ -246,7 +246,8 @@
   </main>
 
   <footer>
-    <p>RunnerTray is free and open source (<a href="https://github.com/azharudh33n/runner-tray/blob/main/LICENSE">MIT</a>). Not affiliated with GitHub, Inc.</p>
+    <p>RunnerTray's code is open source under the <a href="https://github.com/azharudh33n/runner-tray/blob/main/LICENSE">MIT license</a>. The RunnerTray name and logo are trademarks of the RunnerTray project (<a href="https://github.com/azharudh33n/runner-tray/blob/main/TRADEMARKS.md">trademark policy</a>, <a href="https://github.com/azharudh33n/runner-tray/blob/main/docs/brand/README.md">brand guidelines</a>).</p>
+    <p>Not affiliated with GitHub, Inc. GitHub and GitHub Actions are trademarks of GitHub, Inc.</p>
     <p><a href="https://github.com/azharudh33n/runner-tray">Source</a> · <a href="https://github.com/azharudh33n/runner-tray/releases">Releases</a> · <a href="https://github.com/azharudh33n/runner-tray/issues">Report an issue</a></p>
   </footer>
 </body>

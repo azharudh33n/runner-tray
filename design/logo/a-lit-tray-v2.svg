@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <title>RunnerTray concept A: Lit tray</title>
+  <!-- A "Lit tray": a wide, shallow tray holding one status light. -->
+  <g transform="translate(0 -26)">
+    <path d="M28 116 A14 14 0 0 1 56 116 V148 A36 36 0 0 0 92 184 H164 A36 36 0 0 0 200 148 V116 A14 14 0 0 1 228 116 V148 A64 64 0 0 1 164 212 H92 A64 64 0 0 1 28 148 Z" fill="#000"/>
+    <circle cx="128" cy="134" r="32" fill="#000"/>
+  </g>
+</svg>

@@ -57,6 +57,19 @@ internal sealed class PopupForm : Form
         header.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
 
         _title = new Label { Text = "RunnerTray", Font = Theme.Title, AutoSize = true, ForeColor = Theme.Fg, Margin = new Padding(0, 2, 0, 0) };
+
+        // The RunnerTray mark, then the title, side by side.
+        var titleRow = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = Padding.Empty, BackColor = Theme.Bg };
+        if (BrandMark(LogicalToDeviceUnits(Theme.Scaled(24))) is { } mark)
+        {
+            titleRow.Controls.Add(new PictureBox
+            {
+                Image = mark, SizeMode = PictureBoxSizeMode.AutoSize, Margin = new Padding(0, 4, 8, 0),
+                AccessibleRole = AccessibleRole.Graphic, AccessibleName = "RunnerTray logo",
+            });
+        }
+
+        titleRow.Controls.Add(_title);
         _refresh = new Button
         {
             Text = "⟳  Refresh", AutoSize = true, FlatStyle = FlatStyle.Flat, ForeColor = Theme.Fg, BackColor = Theme.Surface,
@@ -70,7 +83,7 @@ internal sealed class PopupForm : Form
         _status = new Label { AutoSize = true, ForeColor = Theme.Muted, Font = Theme.Small, Margin = new Padding(1, 2, 0, 4) };
         _summary = new SummaryControl { Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top, Margin = new Padding(0, 2, 0, 0) };
 
-        header.Controls.Add(_title, 0, 0);
+        header.Controls.Add(titleRow, 0, 0);
         header.Controls.Add(_refresh, 1, 0);
         header.Controls.Add(_status, 0, 1);
         header.SetColumnSpan(_status, 2);
@@ -413,6 +426,16 @@ internal sealed class PopupForm : Form
         "schedule" => "scheduled",
         _ => e.Replace('_', ' '),
     };
+
+    /// <summary>The RunnerTray mark for the header, from the embedded TrayIcons/brand-*.png.</summary>
+    private static Bitmap? BrandMark(int size)
+    {
+        var pick = new[] { 20, 24, 32, 40 }.FirstOrDefault(x => x >= size, 40);
+        using var stream = typeof(PopupForm).Assembly.GetManifestResourceStream($"RunnerTray.TrayIcons.brand-{pick}.png");
+        if (stream is null || Theme.HighContrast) return null;
+        using var src = new Bitmap(stream);
+        return new Bitmap(src, size, size);
+    }
 
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);

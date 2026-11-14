@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- C "R-light": the R of Runner with a status light in its bowl. -->
+  <rect x="56" y="36" width="36" height="184" fill="#000"/>
+  <path d="M92 36 H140 A62 62 0 0 1 140 160 H92 V124 H140 A26 26 0 0 0 140 72 H92 Z" fill="#000"/>
+  <path d="M124 160 H160 L220 220 H184 Z" fill="#000"/>
+  <circle cx="132" cy="98" r="15" fill="#000"/>
+</svg>

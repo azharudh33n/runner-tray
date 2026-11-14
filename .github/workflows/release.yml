@@ -64,7 +64,7 @@ jobs:
           $section = (Get-Content CHANGELOG.md -Raw) -split "(?m)^## " | Where-Object { $_ -match "^\[?$env:VERSION\]?" } | Select-Object -First 1
           if ($section) { "## " + $section | Set-Content $notes } else { "RunnerTray $env:VERSION" | Set-Content $notes }
           vpk pack --packId RunnerTray --packVersion $env:VERSION --packDir out/app --mainExe RunnerTray.exe `
-            --packTitle RunnerTray --packAuthors "RunnerTray contributors" --icon assets/app.ico `
+            --packTitle RunnerTray --packAuthors "RunnerTray contributors" --icon assets/app.ico --splashImage assets/splash.png `
             --releaseNotes $notes -o releases
 
       - name: Upload dry-run output

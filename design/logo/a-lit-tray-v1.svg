@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- A "Lit tray": an open tray holding one status light. -->
+  <path d="M36 104 A14 14 0 0 1 64 104 V150 A42 42 0 0 0 106 192 H150 A42 42 0 0 0 192 150 V104 A14 14 0 0 1 220 104 V150 A70 70 0 0 1 150 220 H106 A70 70 0 0 1 36 150 Z" fill="#000"/>
+  <circle cx="128" cy="126" r="36" fill="#000"/>
+</svg>

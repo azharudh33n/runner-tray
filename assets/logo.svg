@@ -1,17 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="t">
-  <title id="t">RunnerTray logo</title>
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#388BFD"/>
-      <stop offset="1" stop-color="#0B3D91"/>
-    </linearGradient>
-  </defs>
-  <rect width="1024" height="1024" rx="225" fill="url(#bg)"/>
-  <!-- Progress ring with a gap at the top right -->
-  <path d="M 778 358 A 307 307 0 1 1 512 205" fill="none" stroke="#FFFFFF" stroke-width="77" stroke-linecap="round"/>
-  <!-- Run (play) symbol -->
-  <path d="M 440 369 L 686 512 L 440 655 Z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="41" stroke-linejoin="round"/>
-  <!-- Status dot in the gap -->
-  <circle cx="666" cy="246" r="96" fill="#0B3D91"/>
-  <circle cx="666" cy="246" r="74" fill="#3FB950"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img">
+  <title>RunnerTray</title>
+  <rect width="256" height="256" rx="56" fill="#0E1525"/>
+  <g transform="translate(25.6 25.6) scale(0.8)"><path d="M172.12 60.49 A68 68 0 0 0 164 60 H92 A68 68 0 0 0 92 196 H164 A68 68 0 0 0 231.51 119.88 A42 42 0 0 1 201.73 132.53 A38 38 0 0 1 164 166 H92 A38 38 0 0 1 92 90 H159.48 A42 42 0 0 1 172.12 60.49 Z" fill="#F7F6F2"/>
+  <circle cx="201.48" cy="90.52" r="26" fill="#F26B3A"/></g>
 </svg>

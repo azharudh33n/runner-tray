@@ -25,6 +25,7 @@ internal sealed class TrayApp : ApplicationContext
     private readonly Dictionary<long, RunState> _seen = new();
     private readonly IDisposable _showSignal;
     private readonly FileSystemWatcher? _configWatcher;
+    private readonly System.Windows.Forms.Timer _configDebounce = new() { Interval = 700 };
     private readonly ToolStripMenuItem _signInItem = new();
     private readonly ToolStripMenuItem _updateItem = new() { Visible = false };
     private readonly ToolStripMenuItem _startupItem = new("Start with &Windows") { CheckOnClick = true };
@@ -97,6 +98,8 @@ internal sealed class TrayApp : ApplicationContext
         Problems.Raised += OnProblem;
         SystemEvents.SessionSwitch += OnSessionSwitch;
         SystemEvents.PowerModeChanged += OnPowerModeChanged;
+        SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
+        SystemEvents.DisplaySettingsChanged += OnDisplaySettingsChanged;
         NetworkChange.NetworkAvailabilityChanged += OnNetworkChanged;
         _showSignal = SingleInstance.Listen(() => Post(OpenPopup));
 
@@ -270,6 +273,19 @@ internal sealed class TrayApp : ApplicationContext
             Post(() => _ = DelayThenRefreshAsync(TimeSpan.FromSeconds(5)));
         }
     }
+
+    // Taskbar theme (dark or light) or display scale changed: redraw the tray icon to match.
+    private void OnUserPreferenceChanged(object? sender, UserPreferenceChangedEventArgs e) => Post(() =>
+    {
+        Icons.Reset();
+        UpdateIcon();
+    });
+
+    private void OnDisplaySettingsChanged(object? sender, EventArgs e) => Post(() =>
+    {
+        Icons.Reset();
+        UpdateIcon();
+    });
 
     private void OnNetworkChanged(object? sender, NetworkAvailabilityEventArgs e)
     {
@@ -672,10 +688,13 @@ internal sealed class TrayApp : ApplicationContext
     {
         SystemEvents.SessionSwitch -= OnSessionSwitch;
         SystemEvents.PowerModeChanged -= OnPowerModeChanged;
+        SystemEvents.UserPreferenceChanged -= OnUserPreferenceChanged;
+        SystemEvents.DisplaySettingsChanged -= OnDisplaySettingsChanged;
         NetworkChange.NetworkAvailabilityChanged -= OnNetworkChanged;
         Problems.Raised -= OnProblem;
         _showSignal.Dispose();
         _configWatcher?.Dispose();
+        _configDebounce.Dispose();
         _pollTimer.Dispose();
         _localTimer.Dispose();
         _updateTimer.Dispose();

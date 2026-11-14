@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RunnerTray.Core\RunnerTray.Core.csproj" />
+    <EmbeddedResource Include="TrayIcons\*.png" />
     <PackageReference Include="Velopack" Version="1.2.161" />
   </ItemGroup>
 

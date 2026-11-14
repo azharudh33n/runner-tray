@@ -1,8 +1,10 @@
 <p align="center">
-  <img src="assets/logo-256.png" alt="RunnerTray logo" width="112">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/lockup-horizontal-reversed.png">
+    <img src="assets/lockup-horizontal.png" alt="RunnerTray" width="360">
+  </picture>
 </p>
-
-<h1 align="center">RunnerTray: GitHub Actions status in your Windows system tray</h1>
+<h1 align="center">GitHub Actions status in your Windows system tray</h1>
 
 <p align="center">
   <a href="https://github.com/azharudh33n/runner-tray/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/azharudh33n/runner-tray?label=release"></a>
@@ -264,6 +266,13 @@ publishes the GitHub release that installed copies update from.
 | `src/RunnerTray/SignInForm.cs`, `SettingsForm.cs`, `DiagnosticsForm.cs` | Windows |
 | `tests/` | Unit, scenario, UI and accessibility tests |
 
-## License
+## License and trademarks
 
-[MIT](LICENSE)
+The source code is open source under the [MIT license](LICENSE).
+
+The RunnerTray name and logos are trademarks of the RunnerTray project and are **not** covered by
+the MIT license. You may use them to refer to RunnerTray and in unchanged copies of official
+releases. A fork or changed version needs its own name and logo. Details:
+[TRADEMARKS.md](TRADEMARKS.md) · Brand guidelines and logo files: [docs/brand](docs/brand/README.md)
+
+RunnerTray is not affiliated with GitHub, Inc. GitHub and GitHub Actions are trademarks of GitHub, Inc.
