@@ -96,7 +96,7 @@ jobs:
             releases/*.nupkg
       - name: Upload dry-run output
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: runnertray-${{ env.VERSION }}
           path: |
