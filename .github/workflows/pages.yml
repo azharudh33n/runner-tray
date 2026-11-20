@@ -23,7 +23,7 @@ jobs:
       name: website
       url: https://runnertray.wx8.org/
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build site
         shell: pwsh
         run: ./tools/build-site.ps1
